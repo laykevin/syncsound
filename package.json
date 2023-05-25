@@ -2,9 +2,9 @@
   "name": "syncsound",
   "version": "1.0.0",
   "description": "A Node App for listening to music with your friends",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --pretty --transpile-only server/src/index.ts"
   },
   "author": "Kevin Lay",
   "license": "ISC",
