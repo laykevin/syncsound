@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const config = {
@@ -60,10 +59,6 @@ const config = {
     extensions: ['.js', '.jsx', '.tsx', '.ts'],
   },
   devServer: {
-    // contentBase: './client/dist',
-    // proxy: {
-    //   '/api': 'http://localhost:3001',
-    // },
     static: {
       directory: path.join(__dirname, 'client/dist'),
     },
@@ -71,9 +66,6 @@ const config = {
     port: 9000,
   },
   plugins: [
-    // new CopyPlugin({
-    //   patterns: [{ from: 'client/public', to: '.' }],
-    // }),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: './client/public/index.html',
