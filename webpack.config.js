@@ -1,14 +1,17 @@
 const webpack = require('webpack');
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const config = {
   entry: {
-    index: path.join(__dirname, 'src/index.tsx'),
-    content: path.join(__dirname, 'src/content.ts'),
-    background: path.join(__dirname, 'src/background.ts'),
+    index: path.join(__dirname, 'client/src/index.tsx'),
   },
-  output: { path: path.join(__dirname, 'dist'), filename: '[name].js' },
+  output: {
+    path: path.join(__dirname, '/client/dist'),
+    filename: '[name].js',
+    clean: true,
+  },
   module: {
     rules: [
       {
@@ -55,17 +58,27 @@ const config = {
   },
   resolve: {
     extensions: ['.js', '.jsx', '.tsx', '.ts'],
-    alias: {
-      'react-dom': '@hot-loader/react-dom',
-    },
   },
   devServer: {
-    contentBase: './dist',
-    proxy: {
-      '/api': 'http://localhost:3001',
+    // contentBase: './client/dist',
+    // proxy: {
+    //   '/api': 'http://localhost:3001',
+    // },
+    static: {
+      directory: path.join(__dirname, 'client/dist'),
     },
+    compress: true,
+    port: 9000,
   },
-  plugins: [new CopyPlugin({ patterns: [{ from: 'public', to: '.' }] })],
+  plugins: [
+    // new CopyPlugin({
+    //   patterns: [{ from: 'client/public', to: '.' }],
+    // }),
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: './client/public/index.html',
+    }),
+  ],
 };
 
 module.exports = config;
