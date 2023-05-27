@@ -36,6 +36,7 @@ export const Room: React.FC = () => {
   return (
     <>
       <div id="message-container">
+        <div id="embeded"></div>
         <ul>
           {embedCodesList.map((message, index) => (
             <li key={index}>{message}</li>
@@ -45,6 +46,7 @@ export const Room: React.FC = () => {
       <form id="form" onSubmit={handleSubmit}>
         <label htmlFor="embed-input">Embed Code</label>
         <input type="text" id="embed-input"></input>
+        {/* <textarea name="embed-input" id="embed-input" cols={50} rows={3} style={{ resize: 'none' }}></textarea> */}
         <button type="submit">Add</button>
       </form>
     </>
