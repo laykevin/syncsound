@@ -1,5 +1,6 @@
 import React from 'react';
 import { Room, Player } from './components';
+import { Start } from './pages';
 // import { io } from 'socket.io-client';
 
 // const socket = io('http://localhost:7000');
@@ -10,7 +11,7 @@ import { Room, Player } from './components';
 const App: React.FC = () => {
   return (
     <>
-      <div>Hello, World!</div>
+      <Start />
       <Room />
       <Player />
     </>
