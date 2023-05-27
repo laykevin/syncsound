@@ -9,6 +9,7 @@ const io = require('socket.io')(7000, {
 io.on('connection', (socket: any) => {
   console.log('Connected!', socket.id);
   socket.on('send-message', (message: string) => {
+    socket.broadcast.emit('receive-message', message);
     console.log(message);
   });
 });
