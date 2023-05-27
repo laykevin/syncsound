@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 
-interface IVideoData {
+export interface IVideoData {
   src: string;
   title: string;
 }
+const socket = io('http://localhost:7000');
 
 export const Player: React.FC = () => {
   const [userInput, setUserInput] = useState<string>('');
@@ -18,6 +20,14 @@ export const Player: React.FC = () => {
       $embedInput.value = '';
     }
   };
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      socket.on('receive-player', (videoData: IVideoData) => {
+        setVideoData(videoData);
+      });
+    });
+  }, [videoData]);
 
   useEffect(() => {
     if (!userInput) return;
@@ -37,8 +47,8 @@ export const Player: React.FC = () => {
       const titleEnd = userInput.indexOf('"', titleStart); //exclusive
       title = titleEnd > 0 ? userInput.substring(titleStart, titleEnd) : '';
     }
-
     setVideoData({ src, title });
+    socket.emit('send-player', { src, title });
   }, [userInput]);
 
   return (
