@@ -12,8 +12,15 @@ export const Room: React.FC = () => {
   useEffect(() => {
     socket.on('connect', () => {
       setEmbedCodesList((prevEmbedCodesList) => [...prevEmbedCodesList, `Connected with id:${socket.id}`]);
+      socket.on('receive-message', (message: string) => {
+        setEmbedCodesList((prevEmbedCodesList) => [...prevEmbedCodesList, message]);
+      });
     });
   }, []);
+
+  // socket.on('receive-message', (message: string) => {
+  //   setEmbedCodesList((prevEmbedCodesList) => [...prevEmbedCodesList, message]);
+  // });
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
