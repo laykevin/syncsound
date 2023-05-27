@@ -1,5 +1,5 @@
 import React from 'react';
-import { Room } from './Components/index';
+import { Room, Player } from './components';
 // import { io } from 'socket.io-client';
 
 // const socket = io('http://localhost:7000');
@@ -12,6 +12,7 @@ const App: React.FC = () => {
     <>
       <div>Hello, World!</div>
       <Room />
+      <Player />
     </>
   );
 };
