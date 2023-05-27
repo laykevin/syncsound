@@ -8,8 +8,8 @@ const io = require('socket.io')(7000, {
 
 io.on('connection', (socket: any) => {
   console.log('Connected!', socket.id);
-  socket.on('custom-event', (a: any, b: any, c: any) => {
-    console.log(a, b, c);
+  socket.on('send-message', (message: string) => {
+    console.log(message);
   });
 });
 

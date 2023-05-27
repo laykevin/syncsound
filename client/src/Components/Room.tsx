@@ -15,14 +15,13 @@ export const Room: React.FC = () => {
     });
   }, []);
 
-  socket.emit('custom-event', 10, 'Hi', { a: 'a' });
-
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     const $embedInput = document.getElementById('embed-input') as HTMLInputElement;
     const embedCode = $embedInput.value;
     if (embedCode) {
       setEmbedCodesList((prevEmbedCodesList) => [...prevEmbedCodesList, embedCode]);
+      socket.emit('send-message', $embedInput.value);
       $embedInput.value = '';
     }
   };
