@@ -6,7 +6,7 @@
     "server-build": "tsc",
     "server-start": "ts-node-dev --respawn --pretty --transpile-only server/src/index.ts",
     "client-build": "webpack",
-    "client-start": "webpack serve --open"
+    "client-start": "webpack serve --mode=development --open"
   },
   "author": "Kevin Lay",
   "license": "ISC",

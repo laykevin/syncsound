@@ -43,7 +43,7 @@ export const Player: React.FC = () => {
 
     const titleAttrStart = userInput.indexOf('title="');
     if (titleAttrStart > 0) {
-      const titleStart = titleAttrStart + 5;
+      const titleStart = titleAttrStart + 7;
       const titleEnd = userInput.indexOf('"', titleStart); //exclusive
       title = titleEnd > 0 ? userInput.substring(titleStart, titleEnd) : '';
     }
