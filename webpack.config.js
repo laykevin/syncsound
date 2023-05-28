@@ -3,11 +3,13 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const config = {
+  mode: 'development',
+  devtool: 'inline-source-map',
   entry: {
     index: path.join(__dirname, 'client/src/index.tsx'),
   },
   output: {
-    path: path.join(__dirname, '/client/dist'),
+    path: path.join(__dirname, 'client/dist'),
     filename: '[name].js',
     clean: true,
   },
@@ -58,13 +60,16 @@ const config = {
   resolve: {
     extensions: ['.js', '.jsx', '.tsx', '.ts'],
   },
-  devServer: {
-    static: {
-      directory: path.join(__dirname, 'client/dist'),
-    },
-    compress: true,
-    port: 9000,
-  },
+  // devServer: {
+  //   static: {
+  //     directory: path.join(__dirname, 'client/dist'),
+  //   },
+  //   compress: true,
+  //   port: 8080,
+  //   devMiddleware: {
+  //     writeToDisk: true,
+  //   },
+  // },
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
