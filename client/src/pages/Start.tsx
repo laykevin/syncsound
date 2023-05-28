@@ -26,14 +26,11 @@ export const Start: React.FC = () => {
       <Heading>SyncSound</Heading>
       <Panel>
         <h4>Welcome</h4>
-        <label>Room:</label>
-        <input />
-        <label>Name:</label>
-        <input />
-        <div>
-          <button>Create Room</button>
-          <button>Join Room</button>
-        </div>
+        <form action="http://localhost:3000/room" method="POST">
+          <label htmlFor="room-input">Room:</label>
+          <input id="room-input" name="room" type="text" required />
+          <button type="submit">Join</button>
+        </form>
       </Panel>
     </FlexColCenter>
   );

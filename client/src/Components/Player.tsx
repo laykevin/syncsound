@@ -5,7 +5,7 @@ export interface IVideoData {
   src: string;
   title: string;
 }
-const socket = io('http://localhost:7000');
+const socket = io('http://localhost:3000');
 
 export const Player: React.FC = () => {
   const [userInput, setUserInput] = useState<string>('');
