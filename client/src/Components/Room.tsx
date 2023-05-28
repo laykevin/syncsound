@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 
+interface RoomProps {
+  roomName: string;
+}
+
 // const socket = io('http://localhost:7000');
 // socket.on('connect', () => {
 //   displayMessage(`Connected with ${socket.id}`);
 // });
-const socket = io('http://localhost:7000');
-export const Room: React.FC = () => {
+const socket = io('http://localhost:3000');
+export const Room: React.FC<RoomProps> = ({ roomName }) => {
   const [embedCodesList, setEmbedCodesList] = useState<string[]>([]);
 
   useEffect(() => {
@@ -35,6 +39,7 @@ export const Room: React.FC = () => {
 
   return (
     <>
+      <h2>{roomName}</h2>
       <div id="message-container">
         <div id="embeded"></div>
         <ul>
