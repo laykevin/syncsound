@@ -19,6 +19,8 @@ export const Room: React.FC<RoomProps> = ({ roomName }) => {
       socket.on('receive-message', (message: string) => {
         setEmbedCodesList((prevEmbedCodesList) => [...prevEmbedCodesList, message]);
       });
+      socket.on('joined-room', (data) => console.log('joined-room', data));
+      socket.emit('create-or-join-room', roomName);
     });
   }, []);
 
@@ -32,7 +34,7 @@ export const Room: React.FC<RoomProps> = ({ roomName }) => {
     const embedCode = $embedInput.value;
     if (embedCode) {
       setEmbedCodesList((prevEmbedCodesList) => [...prevEmbedCodesList, embedCode]);
-      socket.emit('send-message', $embedInput.value);
+      socket.emit('send-message', $embedInput.value, roomName);
       $embedInput.value = '';
     }
   };
