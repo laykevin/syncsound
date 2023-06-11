@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Room, Player } from './components';
 import { Start } from './pages';
+import { IStateContext, StateContext } from './lib';
 
 interface AppProps {
   roomName: string | null;
+  initialize: (context: IStateContext) => void;
+  disconnect: () => void;
 }
 
-const App: React.FC<AppProps> = ({ roomName }) => {
+export const App: React.FC<AppProps> = ({ roomName, initialize, disconnect }) => {
+  const stateContext = useContext(StateContext);
+
+  useEffect(() => {
+    initialize(stateContext);
+    return disconnect;
+  }, []);
+
   if (roomName)
     return (
       <>
@@ -16,4 +26,3 @@ const App: React.FC<AppProps> = ({ roomName }) => {
     );
   return <Start />;
 };
-export default App;

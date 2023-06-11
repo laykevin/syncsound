@@ -26,9 +26,9 @@ export const Start: React.FC = () => {
       <Heading>SyncSound</Heading>
       <Panel>
         <h4>Welcome</h4>
-        <form action="http://localhost:3000/room" method="POST">
-          <label htmlFor="room-input">Room:</label>
-          <input id="room-input" name="room" type="text" required />
+        <form action="/" method="GET">
+          <label htmlFor="room">Room:</label>
+          <input id="room" name="room" type="text" required />
           <button type="submit">Join</button>
         </form>
       </Panel>
