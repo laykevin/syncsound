@@ -44,8 +44,11 @@ export class SyncSound {
       const doesRoomExist = this._room.doesRoomExist(roomName);
       if (doesRoomExist) this._room.joinRoom(roomName, socket.id);
       else this._room.createRoom(roomName, socket.id);
-
       socket.join(roomName);
+
+      const room = this._room.getRoom(roomName);
+      const user = this._room.getUserBySocketId(roomName, socket.id);
+      if (room && user) socket.emit(ToClientEvents.ssroomJoined, { room, user });
       console.log(`ssroomCreateOrJoin: Room ${doesRoomExist ? 'joined' : 'created'}`);
     });
 
@@ -53,9 +56,11 @@ export class SyncSound {
       if (!user) return console.warn('ssroomLeave: No user');
       const doesRoomExist = this._room.doesRoomExist(user.roomName);
       if (!doesRoomExist) return console.warn('ssroomLeave: Room not found');
-
       this._room.leaveRoom(user.roomName, user.username);
       socket.leave(user.roomName);
+
+      const room = this._room.getRoom(user.roomName);
+      if (room) socket.emit(ToClientEvents.ssroomLeft, { room, user });
       console.log('ssroomLeave:', user);
     });
 
@@ -87,10 +92,13 @@ export class SyncSound {
     this._io.sockets.adapter.on('join-room', (roomName, socketId) => {
       if (!this._room.doesRoomExist(roomName)) return console.warn('adapter-join-room: Room not found');
 
-      this._io.to(roomName).emit(ToClientEvents.ssroomJoined, this._room.getRoom(roomName));
+      const room = this._room.getRoom(roomName);
       const user = this._room.getUserBySocketId(roomName, socketId);
-      const systemChat = this.createSystemChat(roomName, (user?.username || 'A user') + ' has joined the room!');
-      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      if (room && user) {
+        this._io.to(roomName).emit(ToClientEvents.ssroomUserJoined, room);
+        const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has joined the room!');
+        this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      }
 
       console.log('adapter-join-room:', roomName, socketId);
     });
@@ -98,12 +106,14 @@ export class SyncSound {
     this._io.sockets.adapter.on('leave-room', (roomName, socketId) => {
       if (!this._room.doesRoomExist(roomName)) return console.warn('adapter-leave-room: Room not found');
 
-      this._io.to(roomName).emit(ToClientEvents.ssroomLeft, this._room.getRoom(roomName));
+      const room = this._room.getRoom(roomName);
       const user = this._room.getUserBySocketId(roomName, socketId);
-      if (user) this._room.leaveRoom(roomName, user.username);
-
-      const systemChat = this.createSystemChat(roomName, (user?.username || 'A user') + ' has left the room.');
-      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      if (room && user) {
+        this._io.to(roomName).emit(ToClientEvents.ssroomUserLeft, room);
+        this._room.leaveRoom(roomName, user.username);
+        const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has left the room.');
+        this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      }
 
       console.log('adapter-leave-room:', roomName, socketId);
     });

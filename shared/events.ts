@@ -2,26 +2,30 @@ import { IChatMessage, IRoom, IUser } from '.';
 // List of reserved event names: https://socket.io/docs/v4/emit-cheatsheet/#reserved-events
 
 export enum ToServerEvents {
-  sschatSend = 'sschatSend',
   ssroomCreateOrJoin = 'ssroomCreateOrJoin',
   ssroomLeave = 'ssroomLeave',
+  sschatSend = 'sschatSend',
 }
 
 export enum ToClientEvents {
-  sschatSent = 'sschatSent',
   ssroomJoined = 'ssroomJoined',
+  ssroomUserJoined = 'ssroomUserJoined',
   ssroomLeft = 'ssroomLeft',
+  ssroomUserLeft = 'ssroomUserLeft',
+  sschatSent = 'sschatSent',
 }
 
 export interface PayloadMap {
   //to server
-  sschatSend: IChatMessage;
   ssroomCreateOrJoin: string; //roomName
   ssroomLeave: IUser;
+  sschatSend: IChatMessage;
   //to client
+  ssroomJoined: { room: IRoom; user: IUser };
+  ssroomUserJoined: IRoom;
+  ssroomLeft: { room: IRoom; user: IUser };
+  ssroomUserLeft: IRoom;
   sschatSent: IChatMessage;
-  ssroomJoined: IRoom;
-  ssroomLeft: IRoom;
 }
 
 export type ClientToServerEvents = {

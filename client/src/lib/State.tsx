@@ -11,6 +11,7 @@ interface StateProviderProps {
 export const StateContext = createContext<IStateContext>({
   state: {
     socket: io(),
+    user: null,
     room: null,
     chatLog: [],
     playlist: [],
@@ -24,6 +25,7 @@ export const StateContext = createContext<IStateContext>({
 export const StateProvider: React.FC<StateProviderProps> = ({ socket, children }) => {
   const [state, setState] = useState<IState>({
     socket,
+    user: null,
     room: null,
     chatLog: [],
     playlist: [],
@@ -31,6 +33,10 @@ export const StateProvider: React.FC<StateProviderProps> = ({ socket, children }
 
   const mergeState = useCallback((nextState: Partial<IState>) => {
     setState((prevState) => {
+      console.log('StateProvider.mergeState:', prevState, nextState, {
+        ...prevState,
+        ...nextState,
+      });
       return {
         ...prevState,
         ...nextState,

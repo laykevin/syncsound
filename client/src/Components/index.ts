@@ -1,2 +1,2 @@
-export * from './Room';
+export * from './Chat';
 export * from './Player';

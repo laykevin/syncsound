@@ -1,5 +1,5 @@
 import { Socket, io } from 'socket.io-client';
-import { ClientToServerEvents, ServerToClientEvents, ToClientEvents } from 'shared';
+import { ClientToServerEvents, ServerToClientEvents, ToClientEvents, ToServerEvents } from 'shared';
 import { IStateContext } from '.';
 
 export class SyncSoundClient {
@@ -12,35 +12,51 @@ export class SyncSoundClient {
     });
   }
 
-  public initialize = (context: IStateContext): void => {
+  public initialize = (context: IStateContext, roomName: string): void => {
     console.log('SSClient.initialize');
     if (!context) return console.error('No state context provided');
 
     this.socket.onAny((event: string, ...payload: any[]) => {
-      console.log('Event received:', this.socket.id, event, payload);
+      console.log('Event received:', this.socket.id, event, ...payload);
       if (!event.startsWith('ss')) {
         console.warn(`Event "${event}" not recognized as a valid SyncSound event`);
       }
     });
 
     this.addListeners(context);
+
+    this.socket.emit(ToServerEvents.ssroomCreateOrJoin, roomName);
   };
 
   private addListeners = (context: IStateContext): void => {
     this.socket.on(ToClientEvents.sschatSent, (message) => {
       if (!message) return console.warn('sschatSent: No message');
-      const chatLog = [...context.state.chatLog, message];
-      context.mergeState({ chatLog });
+      context.setState((prev) => {
+        console.log('sschatSent: Updating chat log', prev, context.state);
+        return { ...prev, chatLog: [...prev.chatLog, message] };
+      });
     });
 
-    this.socket.on(ToClientEvents.ssroomJoined, (room) => {
-      if (!room) return console.warn('ssroomJoined: No room');
+    this.socket.on(ToClientEvents.ssroomJoined, (payload) => {
+      if (!payload?.room) return console.warn('ssroomJoined: No room');
+      if (!payload?.user) return console.warn('ssroomJoined: No user');
+      context.mergeState({ ...payload });
+    });
+
+    this.socket.on(ToClientEvents.ssroomUserJoined, (room) => {
+      if (!room) return console.warn('ssroomUserJoined: No room');
       context.mergeState({ room });
     });
 
-    this.socket.on(ToClientEvents.ssroomLeft, (room) => {
-      if (!room) return console.warn('ssroomLeft: No room');
-      context.mergeState({ room: null });
+    this.socket.on(ToClientEvents.ssroomLeft, (payload) => {
+      if (!payload?.room) return console.warn('ssroomLeft: No room');
+      if (!payload?.user) return console.warn('ssroomLeft: No user');
+      context.mergeState({ ...payload });
+    });
+
+    this.socket.on(ToClientEvents.ssroomUserLeft, (room) => {
+      if (!room) return console.warn('ssroomUserLeft: No room');
+      context.mergeState({ room });
     });
   };
 

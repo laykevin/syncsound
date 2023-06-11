@@ -8,10 +8,12 @@ const roomName = queryStringParams.get('room');
 const client = new SyncSoundClient();
 
 const $root = document.getElementById('root');
-if ($root)
+if ($root) {
   ReactDOM.createRoot($root).render(
     <StateProvider socket={client.socket}>
       <App roomName={roomName} initialize={client.initialize} disconnect={client.disconnect} />
     </StateProvider>
   );
-else console.error('App failed to launch');
+} else {
+  console.error('App failed to launch...');
+}

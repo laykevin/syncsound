@@ -9,8 +9,7 @@ const FlexColCenter = styled.div`
 `;
 
 const Heading = styled.h1`
-  font-family: sans-serif;
-  color: darkgreen;
+  margin: 0;
   margin-bottom: 4rem;
 `;
 
@@ -23,7 +22,7 @@ const Panel = styled(FlexColCenter)`
 export const Start: React.FC = () => {
   return (
     <FlexColCenter>
-      <Heading>SyncSound</Heading>
+      <Heading>🔁SyncSound🎵</Heading>
       <Panel>
         <h4>Welcome</h4>
         <form action="/" method="GET">
