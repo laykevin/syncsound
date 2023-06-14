@@ -1,19 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { App } from './App';
-import { StateProvider, SyncSoundClient } from './lib';
+import { App, StateProvider, SyncSoundClient } from './lib';
+import { Start } from './pages';
 
 const queryStringParams = new URLSearchParams(window.location.search);
 const roomName = queryStringParams.get('room');
-const client = new SyncSoundClient();
-
 const $root = document.getElementById('root');
-if ($root) {
-  ReactDOM.createRoot($root).render(
+
+const initialize = (rootEl: HTMLElement | null, roomName: string | null): void => {
+  if (!rootEl) return console.error('App failed to launch...');
+  const reactRoot = ReactDOM.createRoot(rootEl);
+  if (!roomName) return reactRoot.render(<Start />);
+  const client = new SyncSoundClient();
+  reactRoot.render(
     <StateProvider socket={client.socket}>
       <App roomName={roomName} initialize={client.initialize} disconnect={client.disconnect} />
     </StateProvider>
   );
-} else {
-  console.error('App failed to launch...');
-}
+  // @ts-ignore
+  window.ssclient = client;
+};
+
+initialize($root, roomName);
+console.log('Launching SyncSound');

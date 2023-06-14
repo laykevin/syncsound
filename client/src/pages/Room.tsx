@@ -1,16 +1,19 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Chat } from '../components';
+import { Chat, Playlist } from '../components';
 
 interface RoomProps {
   roomName: string;
 }
 
-const Container = styled.div`
+const FlexCenter = styled.div`
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
+`;
+
+const Container = styled(FlexCenter)`
+  flex-direction: column;
 `;
 
 export const Room: React.FC<RoomProps> = ({ roomName }) => {
@@ -18,7 +21,10 @@ export const Room: React.FC<RoomProps> = ({ roomName }) => {
     <Container>
       <h2>SyncSound</h2>
       <h3>{roomName}</h3>
-      <Chat />
+      <FlexCenter>
+        <Chat />
+        <Playlist />
+      </FlexCenter>
     </Container>
   );
 };

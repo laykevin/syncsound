@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
-import { Room, Start } from './pages';
-import { IStateContext, StateContext } from './lib';
+import { Room, Start } from '../pages';
+import { IStateContext, StateContext } from '.';
 
 interface AppProps {
   roomName: string | null;

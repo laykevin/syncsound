@@ -9,20 +9,23 @@ export class Room {
 
   doesRoomExist = (roomName: string): boolean => this.roomLookup[roomName] != null;
 
-  getRoom = (roomName: string): IRoom | undefined => {
-    if (!this.doesRoomExist(roomName)) console.warn('Room.getRoom: Room does not exist');
+  getRoom = (roomName: string): IRoom | null => {
+    if (!this.doesRoomExist(roomName)) {
+      console.warn('Room.getRoom: Room does not exist');
+      return null;
+    }
     return this.roomLookup[roomName];
   };
 
-  getNewUser = (roomName: string, socketId: string, username?: string, isHost: boolean = false): IUser => {
+  getNewUser = (roomName: string, socketId: string, isHost: boolean = false, username?: string): IUser => {
     if (!username) username = 'User' + Date.now().toString().slice(-5);
     console.log('Room.getNewUser', username, isHost);
     return { socketId, roomName, username, isHost };
   };
 
-  createRoom = (roomName: string, socketId: string, hostName?: string): void => {
+  createRoom = (roomName: string, socketId: string): void => {
     if (this.doesRoomExist(roomName)) return console.warn('Room.createRoom: Room already exists');
-    this.roomLookup[roomName] = { roomName, users: [this.getNewUser(roomName, socketId, hostName, true)] };
+    this.roomLookup[roomName] = { roomName, users: [this.getNewUser(roomName, socketId, true)], playlist: [] };
     console.log('Room.createRoom:', this.roomLookup);
   };
 

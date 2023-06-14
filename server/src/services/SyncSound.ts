@@ -69,7 +69,7 @@ export class SyncSound {
         socket.rooms.forEach(socket.leave);
         console.log('socket-disconnecting:', reason);
       } catch (err) {
-        console.error('socket-disconnecting error:', err);
+        //console.error('socket-disconnecting error:', err);
       }
     });
 
@@ -79,10 +79,13 @@ export class SyncSound {
       console.log('sschatSend: Chat sent', message);
     });
 
-    // @ts-ignore
-    socket.on('send-player', (videoData, roomName) => {
-      // @ts-ignore
-      socket.to(roomName).emit('receive-player', videoData);
+    socket.on(ToServerEvents.ssplaylistAdd, (sound) => {
+      if (!sound) return console.warn('ssplaylistAdd: No sound');
+      const room = this._room.getRoom(sound.roomName);
+      if (!room) return console.warn('ssplaylistAdd: Room not found');
+      room.playlist.push(sound);
+      socket.to(sound.roomName).emit(ToClientEvents.ssplaylistAdded, room);
+      console.log('ssplaylistAdd: Sound added', sound);
     });
   };
 
@@ -108,13 +111,14 @@ export class SyncSound {
 
       const room = this._room.getRoom(roomName);
       const user = this._room.getUserBySocketId(roomName, socketId);
-      if (room && user) {
-        this._io.to(roomName).emit(ToClientEvents.ssroomUserLeft, room);
-        this._room.leaveRoom(roomName, user.username);
-        const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has left the room.');
-        this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
-      }
+      if (!room || !user) return console.warn('adapter-leave-room: User not found');
 
+      this._io.to(roomName).emit(ToClientEvents.ssroomUserLeft, room);
+      this._room.leaveRoom(roomName, user.username);
+      const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has left the room.');
+      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+
+      if (room.users.length <= 0) this._room.deleteRoom(roomName);
       console.log('adapter-leave-room:', roomName, socketId);
     });
   };

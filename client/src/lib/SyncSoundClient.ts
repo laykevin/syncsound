@@ -1,5 +1,5 @@
 import { Socket, io } from 'socket.io-client';
-import { ClientToServerEvents, ServerToClientEvents, ToClientEvents, ToServerEvents } from 'shared';
+import { ClientToServerEvents, IRoom, ServerToClientEvents, ToClientEvents, ToServerEvents } from 'shared';
 import { IStateContext } from '.';
 
 export class SyncSoundClient {
@@ -25,7 +25,7 @@ export class SyncSoundClient {
 
     this.addListeners(context);
 
-    this.socket.emit(ToServerEvents.ssroomCreateOrJoin, roomName);
+    this.socket.emit(ToServerEvents.ssroomCreateOrJoin, roomName, (room: IRoom) => context.mergeState({ room }));
   };
 
   private addListeners = (context: IStateContext): void => {
@@ -56,6 +56,11 @@ export class SyncSoundClient {
 
     this.socket.on(ToClientEvents.ssroomUserLeft, (room) => {
       if (!room) return console.warn('ssroomUserLeft: No room');
+      context.mergeState({ room });
+    });
+
+    this.socket.on(ToClientEvents.ssplaylistAdded, (room) => {
+      if (!room) return console.warn('ssroomAdded: No room');
       context.mergeState({ room });
     });
   };

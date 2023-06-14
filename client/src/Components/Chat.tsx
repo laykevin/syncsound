@@ -1,6 +1,16 @@
-import React, { useContext, useRef } from 'react';
+import React, { useContext } from 'react';
+import { styled } from 'styled-components';
 import { StateContext } from '../lib';
 import { IChatMessage, ToServerEvents } from 'shared';
+
+const ChatContainer = styled.div`
+  padding: 1rem;
+  margin: 1rem;
+  height: 24rem;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 1rem;
+`;
 
 export const Chat: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
@@ -36,12 +46,12 @@ export const Chat: React.FC = () => {
   };
 
   return (
-    <div>
+    <ChatContainer>
       <div>{chatLog.map(mapChatLog)}</div>
       <form onSubmit={handleSend}>
         <input type="text" name="chat" placeholder="Send a message..." required></input>
         <button type="submit">Send</button>
       </form>
-    </div>
+    </ChatContainer>
   );
 };
