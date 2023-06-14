@@ -7,6 +7,7 @@ const config = {
   devtool: 'inline-source-map',
   entry: {
     index: path.join(__dirname, 'client/src/index.tsx'),
+    // shared: path.join(__dirname, 'shared'),
   },
   output: {
     path: path.join(__dirname, 'client/dist'),
@@ -58,7 +59,11 @@ const config = {
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.tsx', '.ts'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    alias: {
+      shared: path.resolve(__dirname, 'shared/'),
+    },
+    // modules: [path.join(__dirname, 'shared'), 'node_modules'],
   },
   // devServer: {
   //   static: {
