@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { styled } from 'styled-components';
 import { StateContext } from '../lib';
 import { IChatMessage, ToServerEvents } from 'shared';
@@ -7,6 +7,7 @@ const ChatContainer = styled.div`
   padding: 1rem;
   margin: 1rem;
   height: 40rem;
+  width: 16rem;
   border: 1px solid black;
   border-radius: 4px;
   padding: 1rem;
@@ -29,6 +30,13 @@ export const Chat: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
+  const chatBoxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  }, [chatLog]);
 
   const handleSend: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
@@ -66,7 +74,7 @@ export const Chat: React.FC = () => {
       </RowReverse>
       {isOpen && (
         <>
-          <ChatContent id="chatbox">
+          <ChatContent ref={chatBoxRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
           <RowReverse>
