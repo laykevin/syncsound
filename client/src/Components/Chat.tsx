@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { styled } from 'styled-components';
 import { StateContext } from '../lib';
 import { IChatMessage, ToServerEvents } from 'shared';
@@ -6,15 +6,29 @@ import { IChatMessage, ToServerEvents } from 'shared';
 const ChatContainer = styled.div`
   padding: 1rem;
   margin: 1rem;
-  height: 24rem;
+  height: 40rem;
   border: 1px solid black;
   border-radius: 4px;
   padding: 1rem;
 `;
 
+const ChatContent = styled.div`
+  height: 99%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+`;
+
+const RowReverse = styled.div`
+  display: flex;
+  flex-direction: row-reverse;
+`;
+
 export const Chat: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
   const { socket, user, room, chatLog } = state;
+  const [isOpen, setIsOpen] = useState<boolean>(true);
 
   const handleSend: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
@@ -47,11 +61,22 @@ export const Chat: React.FC = () => {
 
   return (
     <ChatContainer>
-      <div>{chatLog.map(mapChatLog)}</div>
-      <form onSubmit={handleSend}>
-        <input type="text" name="chat" placeholder="Send a message..." required></input>
-        <button type="submit">Send</button>
-      </form>
+      <RowReverse>
+        <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? 'Hide Chat' : 'Show Chat'}</button>
+      </RowReverse>
+      {isOpen && (
+        <>
+          <ChatContent id="chatbox">
+            <div>{chatLog.map(mapChatLog)}</div>
+          </ChatContent>
+          <RowReverse>
+            <form onSubmit={handleSend}>
+              <input type="text" name="chat" placeholder="Send a message..." required></input>
+              <button type="submit">Send</button>
+            </form>
+          </RowReverse>
+        </>
+      )}
     </ChatContainer>
   );
 };

@@ -8,23 +8,25 @@ interface RoomProps {
 
 const FlexCenter = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-between;
 `;
 
 const Container = styled(FlexCenter)`
   flex-direction: column;
+  align-items: center;
 `;
 
 export const Room: React.FC<RoomProps> = ({ roomName }) => {
   return (
-    <Container>
-      <h2>SyncSound</h2>
-      <h3>{roomName}</h3>
+    <>
+      <Container>
+        <h2>SyncSound</h2>
+        <h3>{roomName}</h3>
+      </Container>
       <FlexCenter>
-        <Chat />
         <Playlist />
+        <Chat />
       </FlexCenter>
-    </Container>
+    </>
   );
 };
