@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Chat, Playlist } from '../components';
+import { Chat, Playlist, Player } from '../components';
 
 interface RoomProps {
   roomName: string;

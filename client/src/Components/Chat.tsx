@@ -1,7 +1,26 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
-import { styled } from 'styled-components';
+import React, { useContext, useState, useEffect, useRef, useTransition } from 'react';
+import { styled, keyframes } from 'styled-components';
 import { StateContext } from '../lib';
 import { IChatMessage, ToServerEvents } from 'shared';
+import { CSSTransition } from 'react-transition-group';
+
+const DrawerAnimationOpen = keyframes`
+  0% {
+    right: -283px;
+  }
+  100% {
+    right: 0;
+  }
+  `;
+
+const DrawerAnimationClose = keyframes`
+  0% {
+    right: 0;
+  }
+  100% {
+    right: -283px;
+  }
+`;
 
 const ChatContainer = styled.div`
   padding: 1rem;
@@ -11,6 +30,10 @@ const ChatContainer = styled.div`
   border: 1px solid black;
   border-radius: 4px;
   padding: 1rem;
+  position: relative;
+  animation-name: ${DrawerAnimationOpen};
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
 `;
 
 const ChatContent = styled.div`
@@ -19,6 +42,14 @@ const ChatContent = styled.div`
   flex-direction: column;
   justify-content: space-between;
   overflow-y: auto;
+  &::-webkit-scrollbar {
+    width: 10px;
+    background-color: #f5f5f5;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 5px;
+  }
 `;
 
 const RowReverse = styled.div`
@@ -31,6 +62,20 @@ export const Chat: React.FC = () => {
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const chatBoxRef = useRef<HTMLDivElement>(null);
+
+  // const ChatContainer = styled.div`
+  //   padding: 1rem;
+  //   margin: 1rem;
+  //   height: 40rem;
+  //   width: 16rem;
+  //   border: 1px solid black;
+  //   border-radius: 4px;
+  //   padding: 1rem;
+  //   position: relative;
+  //   animation-name: ${isOpen ? DrawerAnimationOpen : DrawerAnimationClose};
+  //   animation-duration: 0.5s;
+  //   animation-fill-mode: forwards;
+  // `;
 
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -68,12 +113,14 @@ export const Chat: React.FC = () => {
   };
 
   return (
-    <ChatContainer>
+    <div>
       <RowReverse>
         <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? 'Hide Chat' : 'Show Chat'}</button>
       </RowReverse>
+
       {isOpen && (
-        <>
+        // <CSSTransition in={isOpen} timeout={500} classNames="chat-container">
+        <ChatContainer>
           <ChatContent ref={chatBoxRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
@@ -83,8 +130,9 @@ export const Chat: React.FC = () => {
               <button type="submit">Send</button>
             </form>
           </RowReverse>
-        </>
+        </ChatContainer>
+        // </CSSTransition>
       )}
-    </ChatContainer>
+    </div>
   );
 };
