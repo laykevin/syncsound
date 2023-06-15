@@ -1,5 +1,10 @@
 import React, { useContext } from 'react';
 import { StateContext } from '../lib';
+import { styled } from 'styled-components';
+
+const PlayerContainer = styled.div`
+  margin: 1rem;
+`;
 
 export const Player: React.FC = () => {
   const { state } = useContext(StateContext);
@@ -7,7 +12,7 @@ export const Player: React.FC = () => {
 
   return (
     <>
-      <div id="player-container">
+      <PlayerContainer id="player-container">
         {room?.playlist[0] && (
           <iframe
             width={1520 / 2}
@@ -19,7 +24,7 @@ export const Player: React.FC = () => {
             allowFullScreen={false}
           ></iframe>
         )}
-      </div>
+      </PlayerContainer>
     </>
   );
 };

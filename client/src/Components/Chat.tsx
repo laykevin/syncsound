@@ -3,6 +3,7 @@ import { styled, keyframes } from 'styled-components';
 import { StateContext } from '../lib';
 import { IChatMessage, ToServerEvents } from 'shared';
 import { CSSTransition } from 'react-transition-group';
+import { UsersList } from '.';
 
 const DrawerAnimationOpen = keyframes`
   0% {
@@ -23,13 +24,12 @@ const DrawerAnimationClose = keyframes`
 `;
 
 const ChatContainer = styled.div`
-  padding: 1rem;
+  padding: 0 1rem 1rem 1rem;
   margin: 1rem;
   height: 75vh;
   width: 16rem;
   border: 1px solid black;
   border-radius: 4px;
-  padding: 1rem;
   position: relative;
   animation-name: ${DrawerAnimationOpen};
   animation-duration: 0.5s;
@@ -37,7 +37,7 @@ const ChatContainer = styled.div`
 `;
 
 const ChatContent = styled.div`
-  height: 99%;
+  height: 92%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -92,11 +92,13 @@ export const Chat: React.FC = () => {
   const chatBoxRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
 
+  console.log('Current Users', room?.users);
+
   useEffect(() => {
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
-  }, [chatLog]);
+  }, [chatLog, isOpen]);
 
   const handleSend: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
@@ -152,6 +154,7 @@ export const Chat: React.FC = () => {
       {isOpen && (
         // <CSSTransition in={isOpen} timeout={500} classNames="chat-container">
         <ChatContainer>
+          <UsersList />
           <ChatContent ref={chatBoxRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
