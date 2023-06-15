@@ -25,7 +25,7 @@ const DrawerAnimationClose = keyframes`
 const ChatContainer = styled.div`
   padding: 1rem;
   margin: 1rem;
-  height: 40rem;
+  height: 75vh;
   width: 16rem;
   border: 1px solid black;
   border-radius: 4px;
@@ -52,9 +52,37 @@ const ChatContent = styled.div`
   }
 `;
 
-const RowReverse = styled.div`
+const Row = styled.div`
   display: flex;
+`;
+
+const RowReverse = styled(Row)`
   flex-direction: row-reverse;
+`;
+
+const UserMessage = styled.div`
+  background-color: lightblue;
+  border-radius: 15px;
+  padding: 5px 0.75rem 5px;
+  margin: 5px 0 2.5px 1rem;
+  max-width: 12.5rem;
+  overflow-wrap: break-word;
+`;
+
+const ReceivedMessage = styled.div`
+  background-color: grey;
+  color: white;
+  border-radius: 15px;
+  padding: 5px 0.75rem 5px;
+  margin: 1px 1rem 2.5px 0;
+  max-width: 12.5rem;
+  overflow-wrap: break-word;
+`;
+
+const MessageOwner = styled.span`
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-left: 0.25rem;
 `;
 
 export const Chat: React.FC = () => {
@@ -62,20 +90,6 @@ export const Chat: React.FC = () => {
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const chatBoxRef = useRef<HTMLDivElement>(null);
-
-  // const ChatContainer = styled.div`
-  //   padding: 1rem;
-  //   margin: 1rem;
-  //   height: 40rem;
-  //   width: 16rem;
-  //   border: 1px solid black;
-  //   border-radius: 4px;
-  //   padding: 1rem;
-  //   position: relative;
-  //   animation-name: ${isOpen ? DrawerAnimationOpen : DrawerAnimationClose};
-  //   animation-duration: 0.5s;
-  //   animation-fill-mode: forwards;
-  // `;
 
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -105,9 +119,24 @@ export const Chat: React.FC = () => {
     if (chat.username === 'System') {
       content = <em style={{ color: 'gray' }}>{chat.message}</em>;
     } else if (chat.username === user?.username) {
-      content = <span>{`You: ${chat.message}`}</span>;
+      content = (
+        <RowReverse>
+          <UserMessage>
+            <span>{`${chat.message}`}</span>
+          </UserMessage>
+        </RowReverse>
+      );
     } else {
-      content = <span>{`${chat.username}: ${chat.message}`}</span>;
+      content = (
+        <>
+          <MessageOwner>{chat.username}</MessageOwner>
+          <Row>
+            <ReceivedMessage>
+              <span>{`${chat.message}`}</span>
+            </ReceivedMessage>
+          </Row>
+        </>
+      );
     }
     return <div key={index}>{content}</div>;
   };
