@@ -14,6 +14,8 @@ const FlexCenter = styled.div`
 const Container = styled(FlexCenter)`
   flex-direction: column;
   align-items: center;
+  background-color: #f6700f;
+  box-shadow: 0 0 2px 0 darkorange;
 `;
 
 export const Room: React.FC<RoomProps> = ({ roomName }) => {

@@ -90,6 +90,7 @@ export const Chat: React.FC = () => {
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const chatBoxRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -111,6 +112,7 @@ export const Chat: React.FC = () => {
     mergeState({ chatLog: [...state.chatLog, chatMessage] });
     socket.emit(ToServerEvents.sschatSend, chatMessage);
     form.reset();
+    chatInputRef.current?.focus();
     console.log('<Chat>: ', event, state, formJson, chatMessage);
   };
 
@@ -155,7 +157,7 @@ export const Chat: React.FC = () => {
           </ChatContent>
           <RowReverse>
             <form onSubmit={handleSend}>
-              <input type="text" name="chat" placeholder="Send a message..." required></input>
+              <input type="text" name="chat" placeholder="Send a message..." required ref={chatInputRef}></input>
               <button type="submit">Send</button>
             </form>
           </RowReverse>
