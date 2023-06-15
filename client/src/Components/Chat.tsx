@@ -24,7 +24,6 @@ const DrawerAnimationClose = keyframes`
 `;
 
 const ChatContainer = styled.div`
-  padding: 0 1rem 1rem 1rem;
   margin: 1rem;
   height: 75vh;
   width: 16rem;
@@ -37,11 +36,13 @@ const ChatContainer = styled.div`
 `;
 
 const ChatContent = styled.div`
-  height: 92%;
+  padding: 0 0.4rem;
+  height: 90%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow-y: auto;
+  scrollbar-gutter: stable both-edges;
   &::-webkit-scrollbar {
     width: 10px;
     background-color: #f5f5f5;
@@ -52,8 +53,24 @@ const ChatContent = styled.div`
   }
 `;
 
+const ChatButton = styled.button`
+  background-color: transparent;
+  border-style: none;
+  font-size: 1.75rem;
+  cursor: pointer;
+`;
+
 const Row = styled.div`
   display: flex;
+`;
+
+const JustifyBetween = styled(Row)`
+  justify-content: space-between;
+  align-items: center;
+  background-color: whitesmoke;
+  padding: 0.25rem 0;
+  margin-bottom: 0.25rem;
+  box-shadow: 0 5px 5px -5px black;
 `;
 
 const RowReverse = styled(Row)`
@@ -147,14 +164,16 @@ export const Chat: React.FC = () => {
 
   return (
     <div>
-      <RowReverse>
-        <button onClick={() => setIsOpen(!isOpen)}>{isOpen ? 'Hide Chat' : 'Show Chat'}</button>
-      </RowReverse>
+      <RowReverse>{!isOpen && <ChatButton onClick={() => setIsOpen(!isOpen)}>💬</ChatButton>}</RowReverse>
 
       {isOpen && (
         // <CSSTransition in={isOpen} timeout={500} classNames="chat-container">
         <ChatContainer>
-          <UsersList />
+          <JustifyBetween>
+            <UsersList />
+            <span>Chat</span>
+            <ChatButton onClick={() => setIsOpen(!isOpen)}>➡️</ChatButton>
+          </JustifyBetween>
           <ChatContent ref={chatBoxRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
