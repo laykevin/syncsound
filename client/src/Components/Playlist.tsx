@@ -2,14 +2,15 @@ import React, { useContext } from 'react';
 import { styled } from 'styled-components';
 import { StateContext } from '../lib';
 import { ISound, SoundOrigin, ToServerEvents } from 'shared';
+import { Player } from './index';
 
 const PlaylistContainer = styled.div`
-  padding: 1rem;
+  padding: 1rem 1rem 0;
   margin: 1rem;
-  height: 24rem;
+  height: 75vh;
   border: 1px solid black;
   border-radius: 4px;
-  padding: 1rem;
+  background-color: #ffffff;
 `;
 
 const BlockBold = styled.div`
