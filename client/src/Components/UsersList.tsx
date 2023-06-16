@@ -24,11 +24,13 @@ const UsersBadge = styled.span`
   color: white;
   width: 1.25rem;
   font-size: 0.9rem;
+  font-weight: bold;
   text-align: center;
   border-radius: 50%;
   position: absolute;
-  left: 1.8rem;
+  left: 1.9rem;
   top: 0.25rem;
+  cursor: pointer;
 `;
 
 export const UsersList: React.FC = () => {
@@ -43,7 +45,7 @@ export const UsersList: React.FC = () => {
   return (
     <>
       <UsersButton onClick={() => setIsOpen(!isOpen)}>👥</UsersButton>
-      <UsersBadge>{room?.users.length}</UsersBadge>
+      <UsersBadge onClick={() => setIsOpen(!isOpen)}>{room?.users.length}</UsersBadge>
       {isOpen && (
         <UsersListContainer>
           <ul>{room?.users.map(mapUsersList)}</ul>

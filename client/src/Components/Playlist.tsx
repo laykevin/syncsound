@@ -5,12 +5,12 @@ import { ISound, SoundOrigin, ToServerEvents } from 'shared';
 import { Player } from './index';
 
 const PlaylistContainer = styled.div`
-  padding: 1rem;
+  padding: 1rem 1rem 0;
   margin: 1rem;
-  height: 24rem;
+  height: 75vh;
   border: 1px solid black;
   border-radius: 4px;
-  padding: 1rem;
+  background-color: #ffffff;
 `;
 
 const BlockBold = styled.div`
@@ -86,24 +86,21 @@ export const Playlist: React.FC = () => {
   };
 
   return (
-    <>
-      <PlaylistContainer>
+    <PlaylistContainer>
+      <div>
         <div>
-          <div>
-            <BlockBold>Now Playing</BlockBold>
-            <div>{room?.playlist && room.playlist.length > 0 ? room.playlist[0].title : 'Add a sound to begin!'}</div>
-          </div>
-          <div>
-            <BlockBold>Up Next</BlockBold>
-            {room?.playlist && room.playlist.length > 1 && room.playlist.slice(1).map(mapPlaylist)}
-          </div>
+          <BlockBold>Now Playing</BlockBold>
+          <div>{room?.playlist && room.playlist.length > 0 ? room.playlist[0].title : 'Add a sound to begin!'}</div>
         </div>
-        <form onSubmit={handleSend}>
-          <input type="text" name="sound" placeholder="Embed code..." required></input>
-          <button type="submit">Queue</button>
-        </form>
-      </PlaylistContainer>
-      <Player />
-    </>
+        <div>
+          <BlockBold>Up Next</BlockBold>
+          {room?.playlist && room.playlist.length > 1 && room.playlist.slice(1).map(mapPlaylist)}
+        </div>
+      </div>
+      <form onSubmit={handleSend}>
+        <input type="text" name="sound" placeholder="Embed code..." required></input>
+        <button type="submit">Queue</button>
+      </form>
+    </PlaylistContainer>
   );
 };

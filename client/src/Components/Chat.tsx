@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useRef, useTransition } from 'r
 import { styled, keyframes } from 'styled-components';
 import { StateContext } from '../lib';
 import { IChatMessage, ToServerEvents } from 'shared';
-import { CSSTransition } from 'react-transition-group';
+import { CSSTransition, Transition } from 'react-transition-group';
 import { UsersList } from '.';
 
 const DrawerAnimationOpen = keyframes`
@@ -23,21 +23,22 @@ const DrawerAnimationClose = keyframes`
   }
 `;
 
-const ChatContainer = styled.div`
-  margin: 1rem;
-  height: 75vh;
-  width: 16rem;
-  border: 1px solid black;
-  border-radius: 4px;
-  position: relative;
-  animation-name: ${DrawerAnimationOpen};
-  animation-duration: 0.5s;
-  animation-fill-mode: forwards;
-`;
+// const ChatContainer = styled.div`
+//   margin: 1rem;
+//   height: 75vh;
+//   width: 16rem;
+//   border: 1px solid black;
+//   border-radius: 4px;
+//   background-color: #4a4a4a;
+//   position: relative;
+//   animation-name: ${DrawerAnimationOpen};
+//   animation-duration: 0.5s;
+//   animation-fill-mode: forwards;
+// `;
 
 const ChatContent = styled.div`
   padding: 0 0.4rem;
-  height: 90%;
+  height: 87%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -67,7 +68,7 @@ const Row = styled.div`
 const JustifyBetween = styled(Row)`
   justify-content: space-between;
   align-items: center;
-  background-color: whitesmoke;
+  background-color: #a5f1ff;
   padding: 0.25rem 0;
   margin-bottom: 0.25rem;
   box-shadow: 0 5px 5px -5px black;
@@ -75,10 +76,11 @@ const JustifyBetween = styled(Row)`
 
 const RowReverse = styled(Row)`
   flex-direction: row-reverse;
+  margin: 1.5rem 0.75rem 0 0;
 `;
 
 const UserMessage = styled.div`
-  background-color: lightblue;
+  background-color: #7adaec;
   border-radius: 15px;
   padding: 5px 0.75rem 5px;
   margin: 5px 0 2.5px 1rem;
@@ -87,7 +89,7 @@ const UserMessage = styled.div`
 `;
 
 const ReceivedMessage = styled.div`
-  background-color: grey;
+  background-color: #385054;
   color: white;
   border-radius: 15px;
   padding: 5px 0.75rem 5px;
@@ -106,10 +108,24 @@ export const Chat: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
+  const [closing, setClosing] = useState<boolean>(true);
   const chatBoxRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
 
   console.log('Current Users', room?.users);
+
+  const ChatContainer = styled.div`
+    margin: 1rem;
+    height: 75vh;
+    width: 16rem;
+    border: 1px solid black;
+    border-radius: 4px;
+    background-color: #4a4a4a;
+    position: relative;
+    animation-name: ${closing ? DrawerAnimationOpen : DrawerAnimationClose};
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+  `;
 
   useEffect(() => {
     if (chatBoxRef.current) {
@@ -164,27 +180,43 @@ export const Chat: React.FC = () => {
 
   return (
     <div>
-      <RowReverse>{!isOpen && <ChatButton onClick={() => setIsOpen(!isOpen)}>💬</ChatButton>}</RowReverse>
-
-      {isOpen && (
-        // <CSSTransition in={isOpen} timeout={500} classNames="chat-container">
+      {isOpen ? (
         <ChatContainer>
           <JustifyBetween>
             <UsersList />
             <span>Chat</span>
-            <ChatButton onClick={() => setIsOpen(!isOpen)}>➡️</ChatButton>
+            <ChatButton
+              onClick={() => {
+                setClosing(!closing);
+                setTimeout(() => setIsOpen(false), 400);
+              }}
+            >
+              ➡️
+            </ChatButton>
           </JustifyBetween>
           <ChatContent ref={chatBoxRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
-          <RowReverse>
-            <form onSubmit={handleSend}>
-              <input type="text" name="chat" placeholder="Send a message..." required ref={chatInputRef}></input>
-              <button type="submit">Send</button>
-            </form>
-          </RowReverse>
+          <form onSubmit={handleSend}>
+            <input type="text" name="chat" placeholder="Send a message..." required ref={chatInputRef}></input>
+            <button type="submit">Send</button>
+          </form>
         </ChatContainer>
-        // </CSSTransition>
+      ) : (
+        <div>
+          <RowReverse>
+            {!isOpen && (
+              <ChatButton
+                onClick={() => {
+                  setClosing(true);
+                  setIsOpen(true);
+                }}
+              >
+                💬
+              </ChatButton>
+            )}
+          </RowReverse>
+        </div>
       )}
     </div>
   );
