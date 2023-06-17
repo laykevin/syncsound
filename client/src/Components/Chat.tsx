@@ -1,40 +1,19 @@
-import React, { useContext, useState, useEffect, useRef, useTransition } from 'react';
-import { styled, keyframes } from 'styled-components';
+import React, { useContext, useState, useEffect, useRef } from 'react';
+import { styled } from 'styled-components';
 import { StateContext } from '../lib';
 import { IChatMessage, ToServerEvents } from 'shared';
 import { CSSTransition, Transition } from 'react-transition-group';
 import { UsersList } from '.';
 
-const DrawerAnimationOpen = keyframes`
-  0% {
-    right: -283px;
-  }
-  100% {
-    right: 0;
-  }
-  `;
-
-const DrawerAnimationClose = keyframes`
-  0% {
-    right: 0;
-  }
-  100% {
-    right: -283px;
-  }
+const ChatContainer = styled.div`
+  margin: 1rem;
+  height: 75vh;
+  width: 16rem;
+  border: 1px solid black;
+  border-radius: 4px;
+  background-color: #4a4a4a;
+  position: relative;
 `;
-
-// const ChatContainer = styled.div`
-//   margin: 1rem;
-//   height: 75vh;
-//   width: 16rem;
-//   border: 1px solid black;
-//   border-radius: 4px;
-//   background-color: #4a4a4a;
-//   position: relative;
-//   animation-name: ${DrawerAnimationOpen};
-//   animation-duration: 0.5s;
-//   animation-fill-mode: forwards;
-// `;
 
 const ChatContent = styled.div`
   padding: 0 0.4rem;
@@ -76,6 +55,9 @@ const JustifyBetween = styled(Row)`
 
 const RowReverse = styled(Row)`
   flex-direction: row-reverse;
+`;
+
+const OpenChatButton = styled(RowReverse)`
   margin: 1.5rem 0.75rem 0 0;
 `;
 
@@ -109,27 +91,12 @@ export const Chat: React.FC = () => {
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [closing, setClosing] = useState<boolean>(true);
-  const chatBoxRef = useRef<HTMLDivElement>(null);
+  const chatBoxScrollRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLInputElement>(null);
 
-  console.log('Current Users', room?.users);
-
-  const ChatContainer = styled.div`
-    margin: 1rem;
-    height: 75vh;
-    width: 16rem;
-    border: 1px solid black;
-    border-radius: 4px;
-    background-color: #4a4a4a;
-    position: relative;
-    animation-name: ${closing ? DrawerAnimationOpen : DrawerAnimationClose};
-    animation-duration: 0.5s;
-    animation-fill-mode: forwards;
-  `;
-
   useEffect(() => {
-    if (chatBoxRef.current) {
-      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    if (chatBoxScrollRef.current) {
+      chatBoxScrollRef.current.scrollTop = chatBoxScrollRef.current.scrollHeight;
     }
   }, [chatLog, isOpen]);
 
@@ -149,6 +116,12 @@ export const Chat: React.FC = () => {
     form.reset();
     chatInputRef.current?.focus();
     console.log('<Chat>: ', event, state, formJson, chatMessage);
+  };
+
+  const toggleChatOpen = (isOpen: boolean) => {
+    setClosing(!isOpen);
+    if (isOpen) setTimeout(() => setIsOpen(false), 400);
+    else setIsOpen(true);
   };
 
   const mapChatLog = (chat: IChatMessage, index: number) => {
@@ -181,20 +154,13 @@ export const Chat: React.FC = () => {
   return (
     <div>
       {isOpen ? (
-        <ChatContainer>
+        <ChatContainer className={closing ? 'chat-open' : 'chat-close'}>
           <JustifyBetween>
             <UsersList />
             <span>Chat</span>
-            <ChatButton
-              onClick={() => {
-                setClosing(!closing);
-                setTimeout(() => setIsOpen(false), 400);
-              }}
-            >
-              ➡️
-            </ChatButton>
+            <ChatButton onClick={() => toggleChatOpen(isOpen)}>➡️</ChatButton>
           </JustifyBetween>
-          <ChatContent ref={chatBoxRef} id="chatbox">
+          <ChatContent ref={chatBoxScrollRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
           <form onSubmit={handleSend}>
@@ -204,18 +170,9 @@ export const Chat: React.FC = () => {
         </ChatContainer>
       ) : (
         <div>
-          <RowReverse>
-            {!isOpen && (
-              <ChatButton
-                onClick={() => {
-                  setClosing(true);
-                  setIsOpen(true);
-                }}
-              >
-                💬
-              </ChatButton>
-            )}
-          </RowReverse>
+          <OpenChatButton>
+            {!isOpen && <ChatButton onClick={() => toggleChatOpen(isOpen)}>💬</ChatButton>}
+          </OpenChatButton>
         </div>
       )}
     </div>
