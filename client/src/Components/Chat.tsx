@@ -6,6 +6,9 @@ import { CSSTransition, Transition } from 'react-transition-group';
 import { UsersList } from '.';
 
 const ChatContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   margin: 1rem;
   height: 75vh;
   width: 16rem;
@@ -17,7 +20,7 @@ const ChatContainer = styled.div`
 
 const ChatContent = styled.div`
   padding: 0 0.4rem;
-  height: 87%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -26,6 +29,7 @@ const ChatContent = styled.div`
   &::-webkit-scrollbar {
     width: 10px;
     background-color: #f5f5f5;
+    border-radius: 5px;
   }
   &::-webkit-scrollbar-thumb {
     background-color: #aaa;
@@ -81,9 +85,27 @@ const ReceivedMessage = styled.div`
 `;
 
 const MessageOwner = styled.span`
+  color: white;
   font-size: 0.85rem;
   font-weight: bold;
   margin-left: 0.25rem;
+`;
+
+const ChatInput = styled.textarea`
+  font-family: inherit;
+  width: 100%;
+  resize: none;
+  max-height: 7.5rem;
+  overflow-y: auto;
+  border: 3px solid transparent;
+  border-radius: 5px;
+  padding: 8px;
+  transition: border-color 0.3s;
+  &:focus {
+    outline: none;
+    border-color: #3ac6e0;
+    box-shadow: 0 0 4px #3ac6e0;
+  }
 `;
 
 export const Chat: React.FC = () => {
@@ -91,8 +113,9 @@ export const Chat: React.FC = () => {
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [closing, setClosing] = useState<boolean>(true);
+  const [chatInputValue, setChatInputValue] = useState('');
   const chatBoxScrollRef = useRef<HTMLDivElement>(null);
-  const chatInputRef = useRef<HTMLInputElement>(null);
+  const chatInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (chatBoxScrollRef.current) {
@@ -100,6 +123,20 @@ export const Chat: React.FC = () => {
     }
   }, [chatLog, isOpen]);
 
+  useEffect(() => {
+    if (chatInputRef.current) {
+      chatInputRef.current.style.height = '0px';
+      const scrollHeight = chatInputRef.current.scrollHeight;
+      chatInputRef.current.style.height = scrollHeight + 'px';
+    }
+  }, [chatInputRef.current, chatInputValue]);
+
+  const handleChatInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = event.target?.value;
+    setChatInputValue(val);
+  };
+
+  // const handleSend = (event: React.FormEvent<HTMLFormElement>) => {
   const handleSend: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     if (!room || !user) return console.warn('<Chat>: Room or user not found', state, event);
@@ -117,6 +154,12 @@ export const Chat: React.FC = () => {
     chatInputRef.current?.focus();
     console.log('<Chat>: ', event, state, formJson, chatMessage);
   };
+
+  // const sendOnEnter = (event) => {
+  //   if (event.keyCode == 13 && event.shiftKey == false) {
+  //     handleSend(event);
+  //   }
+  // };
 
   const toggleChatOpen = (isOpen: boolean) => {
     setClosing(!isOpen);
@@ -164,8 +207,19 @@ export const Chat: React.FC = () => {
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
           <form onSubmit={handleSend}>
-            <input type="text" name="chat" placeholder="Send a message..." required ref={chatInputRef}></input>
-            <button type="submit">Send</button>
+            {/* <input type="text" name="chat" placeholder="Send a message..." required ref={chatInputRef}></input> */}
+            <Row>
+              <ChatInput
+                name="chat"
+                placeholder="Send a message..."
+                required
+                ref={chatInputRef}
+                rows={1}
+                onChange={handleChatInput}
+                value={chatInputValue}
+              ></ChatInput>
+              <button type="submit">✈️</button>
+            </Row>
           </form>
         </ChatContainer>
       ) : (
