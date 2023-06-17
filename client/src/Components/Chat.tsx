@@ -96,15 +96,24 @@ const ChatInput = styled.textarea`
   width: 100%;
   resize: none;
   max-height: 7.5rem;
-  overflow-y: auto;
   border: 3px solid transparent;
   border-radius: 5px;
   padding: 8px;
   transition: border-color 0.3s;
+  cursor: auto;
   &:focus {
     outline: none;
     border-color: #3ac6e0;
     box-shadow: 0 0 4px #3ac6e0;
+  }
+  &::-webkit-scrollbar {
+    width: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 5px;
   }
 `;
 
@@ -127,7 +136,7 @@ export const Chat: React.FC = () => {
     if (chatInputRef.current) {
       chatInputRef.current.style.height = '0px';
       const scrollHeight = chatInputRef.current.scrollHeight;
-      chatInputRef.current.style.height = scrollHeight + 'px';
+      chatInputRef.current.style.height = scrollHeight + 5 + 'px';
     }
   }, [chatInputRef.current, chatInputValue]);
 
@@ -151,6 +160,7 @@ export const Chat: React.FC = () => {
     mergeState({ chatLog: [...state.chatLog, chatMessage] });
     socket.emit(ToServerEvents.sschatSend, chatMessage);
     form.reset();
+    setChatInputValue('');
     chatInputRef.current?.focus();
     console.log('<Chat>: ', event, state, formJson, chatMessage);
   };
