@@ -1,52 +1,38 @@
-import React, { useContext, useState, useEffect, useRef, useTransition } from 'react';
-import { styled, keyframes } from 'styled-components';
+import React, { useContext, useState, useEffect, useRef } from 'react';
+import { styled } from 'styled-components';
 import { StateContext } from '../lib';
 import { IChatMessage, ToServerEvents } from 'shared';
 import { CSSTransition, Transition } from 'react-transition-group';
 import { UsersList } from '.';
 
-const DrawerAnimationOpen = keyframes`
-  0% {
-    right: -283px;
-  }
-  100% {
-    right: 0;
-  }
-  `;
-
-const DrawerAnimationClose = keyframes`
-  0% {
-    right: 0;
-  }
-  100% {
-    right: -283px;
-  }
+const Flex = styled.div`
+  display: flex;
 `;
 
-// const ChatContainer = styled.div`
-//   margin: 1rem;
-//   height: 75vh;
-//   width: 16rem;
-//   border: 1px solid black;
-//   border-radius: 4px;
-//   background-color: #4a4a4a;
-//   position: relative;
-//   animation-name: ${DrawerAnimationOpen};
-//   animation-duration: 0.5s;
-//   animation-fill-mode: forwards;
-// `;
-
-const ChatContent = styled.div`
-  padding: 0 0.4rem;
-  height: 87%;
-  display: flex;
+const ChatContainer = styled(Flex)`
   flex-direction: column;
+  justify-content: space-between;
+  margin: 1rem;
+  height: 75vh;
+  width: 16rem;
+  border: 1px solid black;
+  border-radius: 4px;
+  background-color: #4a4a4a;
+  position: relative;
+`;
+
+const ChatContent = styled(Flex)`
+  padding: 0 0.4rem;
+  margin-bottom: 0.25rem;
+  height: 100%;
+  flex-direction: column-reverse;
   justify-content: space-between;
   overflow-y: auto;
   scrollbar-gutter: stable both-edges;
   &::-webkit-scrollbar {
     width: 10px;
     background-color: #f5f5f5;
+    border-radius: 5px;
   }
   &::-webkit-scrollbar-thumb {
     background-color: #aaa;
@@ -61,11 +47,7 @@ const ChatButton = styled.button`
   cursor: pointer;
 `;
 
-const Row = styled.div`
-  display: flex;
-`;
-
-const JustifyBetween = styled(Row)`
+const ChatHeader = styled(Flex)`
   justify-content: space-between;
   align-items: center;
   background-color: #a5f1ff;
@@ -74,8 +56,11 @@ const JustifyBetween = styled(Row)`
   box-shadow: 0 5px 5px -5px black;
 `;
 
-const RowReverse = styled(Row)`
+const FlexReverse = styled(Flex)`
   flex-direction: row-reverse;
+`;
+
+const OpenChatButton = styled(FlexReverse)`
   margin: 1.5rem 0.75rem 0 0;
 `;
 
@@ -99,40 +84,67 @@ const ReceivedMessage = styled.div`
 `;
 
 const MessageOwner = styled.span`
+  color: white;
   font-size: 0.85rem;
   font-weight: bold;
   margin-left: 0.25rem;
+`;
+
+const ChatInput = styled.textarea`
+  font-family: inherit;
+  width: 100%;
+  resize: none;
+  max-height: 7.5rem;
+  border: 3px solid transparent;
+  border-radius: 5px;
+  padding: 8px;
+  transition: border-color 0.3s;
+  cursor: auto;
+  &:focus {
+    outline: none;
+    border-color: #3ac6e0;
+    box-shadow: 0 0 4px #3ac6e0;
+  }
+  &::-webkit-scrollbar {
+    width: 10px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 5px;
+  }
 `;
 
 export const Chat: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const [closing, setClosing] = useState<boolean>(true);
-  const chatBoxRef = useRef<HTMLDivElement>(null);
-  const chatInputRef = useRef<HTMLInputElement>(null);
-
-  console.log('Current Users', room?.users);
-
-  const ChatContainer = styled.div`
-    margin: 1rem;
-    height: 75vh;
-    width: 16rem;
-    border: 1px solid black;
-    border-radius: 4px;
-    background-color: #4a4a4a;
-    position: relative;
-    animation-name: ${closing ? DrawerAnimationOpen : DrawerAnimationClose};
-    animation-duration: 0.5s;
-    animation-fill-mode: forwards;
-  `;
-
+  const [closing, setClosing] = useState<boolean | null>(true);
+  const [chatInputValue, setChatInputValue] = useState('');
+  const chatBoxScrollRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<HTMLTextAreaElement>(null);
+  //Keeps messaages scrolled to bottom
   useEffect(() => {
-    if (chatBoxRef.current) {
-      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    if (chatBoxScrollRef.current) {
+      chatBoxScrollRef.current.scrollTop = chatBoxScrollRef.current.scrollHeight;
     }
   }, [chatLog, isOpen]);
+  //Makes text area dynamic
+  useEffect(() => {
+    if (chatInputRef.current) {
+      chatInputRef.current.style.height = '0px';
+      const scrollHeight = chatInputRef.current.scrollHeight;
+      chatInputRef.current.style.height = scrollHeight + 6 + 'px';
+    }
+  }, [chatInputRef.current, chatInputValue]);
 
+  const handleChatInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = event.target?.value;
+    setChatInputValue(val);
+  };
+
+  // const handleSend = (event: React.FormEvent<HTMLFormElement>) => {
   const handleSend: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     if (!room || !user) return console.warn('<Chat>: Room or user not found', state, event);
@@ -147,8 +159,21 @@ export const Chat: React.FC = () => {
     mergeState({ chatLog: [...state.chatLog, chatMessage] });
     socket.emit(ToServerEvents.sschatSend, chatMessage);
     form.reset();
+    setChatInputValue('');
     chatInputRef.current?.focus();
     console.log('<Chat>: ', event, state, formJson, chatMessage);
+  };
+
+  // const sendOnEnter = (event) => {
+  //   if (event.keyCode == 13 && event.shiftKey == false) {
+  //     handleSend(event);
+  //   }
+  // };
+
+  const toggleChatOpen = (isOpen: boolean) => {
+    setClosing(!isOpen);
+    if (isOpen) setTimeout(() => setIsOpen(false), 400);
+    else setIsOpen(true);
   };
 
   const mapChatLog = (chat: IChatMessage, index: number) => {
@@ -157,21 +182,17 @@ export const Chat: React.FC = () => {
       content = <em style={{ color: 'gray' }}>{chat.message}</em>;
     } else if (chat.username === user?.username) {
       content = (
-        <RowReverse>
-          <UserMessage>
-            <span>{`${chat.message}`}</span>
-          </UserMessage>
-        </RowReverse>
+        <FlexReverse>
+          <UserMessage>{chat.message}</UserMessage>
+        </FlexReverse>
       );
     } else {
       content = (
         <>
           <MessageOwner>{chat.username}</MessageOwner>
-          <Row>
-            <ReceivedMessage>
-              <span>{`${chat.message}`}</span>
-            </ReceivedMessage>
-          </Row>
+          <Flex>
+            <ReceivedMessage>{chat.message}</ReceivedMessage>
+          </Flex>
         </>
       );
     }
@@ -181,41 +202,36 @@ export const Chat: React.FC = () => {
   return (
     <div>
       {isOpen ? (
-        <ChatContainer>
-          <JustifyBetween>
+        <ChatContainer className={closing ? 'chat-open' : 'chat-close'}>
+          <ChatHeader>
             <UsersList />
             <span>Chat</span>
-            <ChatButton
-              onClick={() => {
-                setClosing(!closing);
-                setTimeout(() => setIsOpen(false), 400);
-              }}
-            >
-              ➡️
-            </ChatButton>
-          </JustifyBetween>
-          <ChatContent ref={chatBoxRef} id="chatbox">
+            <ChatButton onClick={() => toggleChatOpen(isOpen)}>➡️</ChatButton>
+          </ChatHeader>
+          <ChatContent ref={chatBoxScrollRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
           <form onSubmit={handleSend}>
-            <input type="text" name="chat" placeholder="Send a message..." required ref={chatInputRef}></input>
-            <button type="submit">Send</button>
+            {/* <input type="text" name="chat" placeholder="Send a message..." required ref={chatInputRef}></input> */}
+            <Flex>
+              <ChatInput
+                name="chat"
+                placeholder="Send a message..."
+                required
+                ref={chatInputRef}
+                rows={1}
+                onChange={handleChatInput}
+                value={chatInputValue}
+              ></ChatInput>
+              <button type="submit">✈️</button>
+            </Flex>
           </form>
         </ChatContainer>
       ) : (
         <div>
-          <RowReverse>
-            {!isOpen && (
-              <ChatButton
-                onClick={() => {
-                  setClosing(true);
-                  setIsOpen(true);
-                }}
-              >
-                💬
-              </ChatButton>
-            )}
-          </RowReverse>
+          <OpenChatButton>
+            {!isOpen && <ChatButton onClick={() => toggleChatOpen(isOpen)}>💬</ChatButton>}
+          </OpenChatButton>
         </div>
       )}
     </div>
