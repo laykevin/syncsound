@@ -36,10 +36,17 @@ const UsersBadge = styled.span`
 export const UsersList: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { state } = useContext(StateContext);
-  const { room } = state;
+  const { room, user } = state;
+  console.log('Current user?', user?.username);
 
   const mapUsersList = (users: IUser, index: number) => {
-    return <li key={index}>{users.username}</li>;
+    return (
+      <li key={index}>
+        {users.username}
+        {users.isHost && <span title="Host">👑</span>}
+        {users.username === user?.username && 'Change Name'}
+      </li>
+    );
   };
 
   return (
