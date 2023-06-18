@@ -5,8 +5,11 @@ import { IChatMessage, ToServerEvents } from 'shared';
 import { CSSTransition, Transition } from 'react-transition-group';
 import { UsersList } from '.';
 
-const ChatContainer = styled.div`
+const Flex = styled.div`
   display: flex;
+`;
+
+const ChatContainer = styled(Flex)`
   flex-direction: column;
   justify-content: space-between;
   margin: 1rem;
@@ -18,11 +21,11 @@ const ChatContainer = styled.div`
   position: relative;
 `;
 
-const ChatContent = styled.div`
+const ChatContent = styled(Flex)`
   padding: 0 0.4rem;
+  margin-bottom: 0.25rem;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   justify-content: space-between;
   overflow-y: auto;
   scrollbar-gutter: stable both-edges;
@@ -44,11 +47,7 @@ const ChatButton = styled.button`
   cursor: pointer;
 `;
 
-const Row = styled.div`
-  display: flex;
-`;
-
-const JustifyBetween = styled(Row)`
+const ChatHeader = styled(Flex)`
   justify-content: space-between;
   align-items: center;
   background-color: #a5f1ff;
@@ -57,11 +56,11 @@ const JustifyBetween = styled(Row)`
   box-shadow: 0 5px 5px -5px black;
 `;
 
-const RowReverse = styled(Row)`
+const FlexReverse = styled(Flex)`
   flex-direction: row-reverse;
 `;
 
-const OpenChatButton = styled(RowReverse)`
+const OpenChatButton = styled(FlexReverse)`
   margin: 1.5rem 0.75rem 0 0;
 `;
 
@@ -121,22 +120,22 @@ export const Chat: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
   const { socket, user, room, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const [closing, setClosing] = useState<boolean>(true);
+  const [closing, setClosing] = useState<boolean | null>(true);
   const [chatInputValue, setChatInputValue] = useState('');
   const chatBoxScrollRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
-
+  //Keeps messaages scrolled to bottom
   useEffect(() => {
     if (chatBoxScrollRef.current) {
       chatBoxScrollRef.current.scrollTop = chatBoxScrollRef.current.scrollHeight;
     }
   }, [chatLog, isOpen]);
-
+  //Makes text area dynamic
   useEffect(() => {
     if (chatInputRef.current) {
       chatInputRef.current.style.height = '0px';
       const scrollHeight = chatInputRef.current.scrollHeight;
-      chatInputRef.current.style.height = scrollHeight + 5 + 'px';
+      chatInputRef.current.style.height = scrollHeight + 6 + 'px';
     }
   }, [chatInputRef.current, chatInputValue]);
 
@@ -183,21 +182,21 @@ export const Chat: React.FC = () => {
       content = <em style={{ color: 'gray' }}>{chat.message}</em>;
     } else if (chat.username === user?.username) {
       content = (
-        <RowReverse>
+        <FlexReverse>
           <UserMessage>
             <span>{`${chat.message}`}</span>
           </UserMessage>
-        </RowReverse>
+        </FlexReverse>
       );
     } else {
       content = (
         <>
           <MessageOwner>{chat.username}</MessageOwner>
-          <Row>
+          <Flex>
             <ReceivedMessage>
               <span>{`${chat.message}`}</span>
             </ReceivedMessage>
-          </Row>
+          </Flex>
         </>
       );
     }
@@ -208,17 +207,17 @@ export const Chat: React.FC = () => {
     <div>
       {isOpen ? (
         <ChatContainer className={closing ? 'chat-open' : 'chat-close'}>
-          <JustifyBetween>
+          <ChatHeader>
             <UsersList />
             <span>Chat</span>
             <ChatButton onClick={() => toggleChatOpen(isOpen)}>➡️</ChatButton>
-          </JustifyBetween>
+          </ChatHeader>
           <ChatContent ref={chatBoxScrollRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatContent>
           <form onSubmit={handleSend}>
             {/* <input type="text" name="chat" placeholder="Send a message..." required ref={chatInputRef}></input> */}
-            <Row>
+            <Flex>
               <ChatInput
                 name="chat"
                 placeholder="Send a message..."
@@ -229,7 +228,7 @@ export const Chat: React.FC = () => {
                 value={chatInputValue}
               ></ChatInput>
               <button type="submit">✈️</button>
-            </Row>
+            </Flex>
           </form>
         </ChatContainer>
       ) : (
