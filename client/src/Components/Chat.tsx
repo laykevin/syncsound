@@ -183,9 +183,7 @@ export const Chat: React.FC = () => {
     } else if (chat.username === user?.username) {
       content = (
         <FlexReverse>
-          <UserMessage>
-            <span>{`${chat.message}`}</span>
-          </UserMessage>
+          <UserMessage>{chat.message}</UserMessage>
         </FlexReverse>
       );
     } else {
@@ -193,9 +191,7 @@ export const Chat: React.FC = () => {
         <>
           <MessageOwner>{chat.username}</MessageOwner>
           <Flex>
-            <ReceivedMessage>
-              <span>{`${chat.message}`}</span>
-            </ReceivedMessage>
+            <ReceivedMessage>{chat.message}</ReceivedMessage>
           </Flex>
         </>
       );
