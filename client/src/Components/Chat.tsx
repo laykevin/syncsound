@@ -1,9 +1,9 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { styled } from 'styled-components';
 import { StateContext } from '../lib';
-import { IChatMessage, ToServerEvents } from 'shared';
+import { IChatMessage } from 'shared';
 import { CSSTransition, Transition } from 'react-transition-group';
-import { UsersList } from '.';
+import { ChatTextArea, UsersList } from '.';
 
 const Flex = styled.div`
   display: flex;
@@ -92,84 +92,21 @@ const MessageOwner = styled.span`
   margin-left: 0.25rem;
 `;
 
-const ChatTextArea = styled.textarea`
-  font-family: inherit;
-  width: 100%;
-  resize: none;
-  max-height: 7.5rem;
-  border: 3px solid transparent;
-  border-radius: 5px;
-  padding: 8px;
-  transition: border-color 0.3s;
-  cursor: auto;
-  scrollbar-gutter: stable;
-  &:focus {
-    outline: none;
-    border-color: #3ac6e0;
-    box-shadow: 0 0 4px #3ac6e0;
-  }
-  &::-webkit-scrollbar {
-    width: 10px;
-    background-color: #f5f5f5;
-    border-radius: 5px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #aaa;
-    border-radius: 5px;
-  }
-`;
-
 export const Chat: React.FC = () => {
-  const { state, mergeState } = useContext(StateContext);
-  const { socket, user, room, chatLog } = state;
+  const { state } = useContext(StateContext);
+  const { user, chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
-  const [closing, setClosing] = useState<boolean | null>(true);
-  const [chatTextAreaValue, setChatTextAreaValue] = useState('');
+  const [opening, setOpening] = useState<boolean>(true);
   const chatBoxScrollRef = useRef<HTMLDivElement>(null);
-  const chatTextAreaRef = useRef<HTMLTextAreaElement>(null);
   //Keeps messaages scrolled to bottom
   useEffect(() => {
     if (chatBoxScrollRef.current) {
       chatBoxScrollRef.current.scrollTop = chatBoxScrollRef.current.scrollHeight;
     }
   }, [chatLog, isOpen]);
-  //Makes text area dynamic
-  useEffect(() => {
-    if (chatTextAreaRef.current) {
-      chatTextAreaRef.current.style.height = '0px';
-      const scrollHeight = chatTextAreaRef.current.scrollHeight;
-      chatTextAreaRef.current.style.height = scrollHeight + 6 + 'px';
-    }
-  }, [chatTextAreaRef.current, chatTextAreaValue]);
-
-  const handleChatTextArea = (event: React.ChangeEvent<HTMLTextAreaElement>): void => {
-    setChatTextAreaValue(event.target?.value);
-  };
-
-  const handleSend = (event: React.KeyboardEvent | React.MouseEvent): void => {
-    event.preventDefault();
-    chatTextAreaRef.current?.focus();
-    if (!chatTextAreaValue.trim().length) return;
-    if (!room || !user) return console.warn('<Chat>: Room or user not found', state, event);
-    const chatMessage = {
-      roomName: room.roomName,
-      username: user.username,
-      message: chatTextAreaValue,
-    };
-    mergeState({ chatLog: [...state.chatLog, chatMessage] });
-    socket.emit(ToServerEvents.sschatSend, chatMessage);
-    setChatTextAreaValue('');
-    console.log('<Chat>: ', event, state, chatTextAreaValue, chatMessage);
-  };
-
-  const sendOnEnter = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      handleSend(event);
-    }
-  };
 
   const toggleChatOpen = (isOpen: boolean): void => {
-    setClosing(!isOpen);
+    setOpening(!isOpen);
     if (isOpen) setTimeout(() => setIsOpen(false), 400);
     else setIsOpen(true);
   };
@@ -200,7 +137,7 @@ export const Chat: React.FC = () => {
   return (
     <div>
       {isOpen ? (
-        <ChatContainer className={closing ? 'chat-open' : 'chat-close'}>
+        <ChatContainer className={opening ? 'chat-open' : 'chat-close'}>
           <ChatHeader>
             <UsersList />
             <span>Chat</span>
@@ -209,19 +146,7 @@ export const Chat: React.FC = () => {
           <ChatMessagesContainer ref={chatBoxScrollRef} id="chatbox">
             <div>{chatLog.map(mapChatLog)}</div>
           </ChatMessagesContainer>
-          <Flex>
-            <ChatTextArea
-              name="chat"
-              placeholder="Send a message..."
-              required
-              ref={chatTextAreaRef}
-              rows={1}
-              onChange={handleChatTextArea}
-              value={chatTextAreaValue}
-              onKeyDown={sendOnEnter}
-            ></ChatTextArea>
-            <button onClick={handleSend}>✈️</button>
-          </Flex>
+          <ChatTextArea />
         </ChatContainer>
       ) : (
         <div>
