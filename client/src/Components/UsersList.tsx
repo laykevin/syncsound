@@ -33,20 +33,31 @@ const UsersBadge = styled.span`
   cursor: pointer;
 `;
 
+const SpaceBetween = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+`;
+
 export const UsersList: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [editingName, setEditingName] = useState(false);
   const { state } = useContext(StateContext);
   const { room, user } = state;
   console.log('Current user?', user?.username);
 
   const mapUsersList = (users: IUser, index: number) => {
-    return (
-      <li key={index}>
-        {users.username}
-        {users.isHost && <span title="Host">👑</span>}
-        {users.username === user?.username && 'Change Name'}
-      </li>
-    );
+    if (users.username !== user?.username)
+      return (
+        <li key={index}>
+          <SpaceBetween>
+            <div>
+              {users.username}
+              {users.isHost && <span title="Host">👑</span>}
+            </div>
+          </SpaceBetween>
+        </li>
+      );
   };
 
   return (
@@ -55,7 +66,18 @@ export const UsersList: React.FC = () => {
       <UsersBadge onClick={() => setIsOpen(!isOpen)}>{room?.users.length}</UsersBadge>
       {isOpen && (
         <UsersListContainer>
-          <ul>{room?.users.map(mapUsersList)}</ul>
+          <ul>
+            <li>
+              <SpaceBetween>
+                {user?.username}
+                {user?.isHost && '👑'}
+                <button onClick={() => setEditingName(true)} title="Change Name">
+                  🖊️
+                </button>
+              </SpaceBetween>
+            </li>
+            {room?.users.map(mapUsersList)}
+          </ul>
         </UsersListContainer>
       )}
     </>
