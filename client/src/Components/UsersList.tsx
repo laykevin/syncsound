@@ -34,13 +34,17 @@ const UsersBadge = styled.span`
   top: 0.25rem;
   cursor: pointer;
 `;
-const LiPadding = styled.span`
-  padding: 0.25rem 0;
-`;
+const LiPadding = styled.input``;
 
-const UsersLi = styled(LiPadding)`
+const NameForm = styled.span`
   display: flex;
   justify-content: space-between;
+`;
+
+const UsersLi = styled.span`
+  display: flex;
+  justify-content: space-between;
+  margin: 0.25rem 0;
 `;
 
 const RowReverse = styled.div`
@@ -59,15 +63,17 @@ export const UsersList: React.FC = () => {
   const mapUsersList = (roomUser: IUser, index: number) => {
     // if (users.username !== user?.username)
     return (
-      <LiPadding key={index} style={{ order: roomUser.username !== user?.username ? '1' : '0' }}>
-        {roomUser.username}
-        {roomUser.isHost && <span title="Host">👑</span>}
+      <UsersLi key={index} style={{ order: roomUser.username !== user?.username ? '1' : '0' }}>
+        <div>
+          {roomUser.username}
+          {roomUser.isHost && <span title="Host">👑</span>}
+        </div>
         {roomUser.username === user?.username && (
           <button onClick={() => setEditingName(true)} title="Change Name">
             🖊️
           </button>
         )}
-      </LiPadding>
+      </UsersLi>
     );
   };
 
@@ -109,19 +115,21 @@ export const UsersList: React.FC = () => {
 
   const EditName: React.FC = () => {
     return (
-      <form onSubmit={handleNameChange}>
-        <UsersLi>
-          <input type="text" ref={nameInputRef} autoFocus placeholder={user?.username}></input>
-          <RowReverse>
-            <button type="submit" title="Save">
-              ✔️
-            </button>
-            <button onClick={() => setEditingName(false)} title="Cancel">
-              ❌
-            </button>
-          </RowReverse>
-        </UsersLi>
-      </form>
+      <UsersListContainer style={{ zIndex: '1' }}>
+        <form onSubmit={handleNameChange}>
+          <NameForm>
+            <LiPadding type="text" ref={nameInputRef} autoFocus required placeholder={user?.username}></LiPadding>
+            <RowReverse>
+              <button type="submit" title="Save">
+                ✔️
+              </button>
+              <button onClick={() => setEditingName(false)} title="Cancel">
+                ❌
+              </button>
+            </RowReverse>
+          </NameForm>
+        </form>
+      </UsersListContainer>
     );
   };
 
@@ -130,12 +138,15 @@ export const UsersList: React.FC = () => {
       <UsersButton onClick={handleUsersButton}>👥</UsersButton>
       <UsersBadge onClick={handleUsersButton}>{room?.users.length}</UsersBadge>
       {isOpen && (
-        <UsersListContainer>
-          {/* <ul>
+        <>
+          {editingName && <EditName />}
+          <UsersListContainer>
+            {/* <ul>
             {!editingName ? <UsersLiComponent /> : <EditName />} */}
-          {!editingName ? room?.users.map(mapUsersList) : <EditName />}
-          {/* </ul> */}
-        </UsersListContainer>
+            {room?.users.map(mapUsersList)}
+            {/* </ul> */}
+          </UsersListContainer>
+        </>
       )}
     </>
   );
