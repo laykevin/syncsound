@@ -9,7 +9,7 @@ const UsersListContainer = styled.div`
   background-color: whitesmoke;
   border: 1px solid black;
   border-radius: 4px;
-  width: 80%;
+  width: 100%;
 `;
 
 const UsersButton = styled.button`
@@ -32,11 +32,13 @@ const UsersBadge = styled.span`
   top: 0.25rem;
   cursor: pointer;
 `;
+const LiPadding = styled.li`
+  padding: 0.25rem 0;
+`;
 
-const SpaceBetween = styled.div`
+const UsersLi = styled(LiPadding)`
   display: flex;
   justify-content: space-between;
-  padding: 0.25rem 0;
 `;
 
 export const UsersList: React.FC = () => {
@@ -49,15 +51,40 @@ export const UsersList: React.FC = () => {
   const mapUsersList = (users: IUser, index: number) => {
     if (users.username !== user?.username)
       return (
-        <li key={index}>
-          <SpaceBetween>
-            <div>
-              {users.username}
-              {users.isHost && <span title="Host">👑</span>}
-            </div>
-          </SpaceBetween>
-        </li>
+        <LiPadding key={index}>
+          {users.username}
+          {users.isHost && <span title="Host">👑</span>}
+        </LiPadding>
       );
+  };
+
+  const UsersLiComponent: React.FC = () => {
+    return (
+      <UsersLi>
+        {user?.isHost ? <span title="Host">{user.username}👑</span> : user?.username}
+        <button onClick={() => setEditingName(true)} title="Change Name">
+          🖊️
+        </button>
+      </UsersLi>
+    );
+  };
+
+  const EditName: React.FC = () => {
+    return (
+      <form onSubmit={() => setEditingName(false)}>
+        <UsersLi>
+          <input type="text"></input>
+          <div>
+            <button onClick={() => setEditingName(false)} title="Cancel">
+              ❌
+            </button>
+            <button type="submit" title="Save">
+              ✔️
+            </button>
+          </div>
+        </UsersLi>
+      </form>
+    );
   };
 
   return (
@@ -67,15 +94,7 @@ export const UsersList: React.FC = () => {
       {isOpen && (
         <UsersListContainer>
           <ul>
-            <li>
-              <SpaceBetween>
-                {user?.username}
-                {user?.isHost && '👑'}
-                <button onClick={() => setEditingName(true)} title="Change Name">
-                  🖊️
-                </button>
-              </SpaceBetween>
-            </li>
+            {!editingName ? <UsersLiComponent /> : <EditName />}
             {room?.users.map(mapUsersList)}
           </ul>
         </UsersListContainer>
