@@ -45,6 +45,15 @@ export class SyncSoundClient {
 
     this.socket.on(ToClientEvents.ssroomUserJoined, (room) => {
       if (!room) return console.warn('ssroomUserJoined: No room');
+      console.log('Join ConsoleLog');
+      context.mergeState({ room });
+    });
+    //Kevin Change
+    this.socket.on(ToClientEvents.ssroomUserChangedName, (newName) => {
+      if (!newName) return console.warn('ssroomUserJoined: No room');
+      console.log('KEVINS console newName', newName);
+      const { room, user } = newName;
+      console.log('change name?', room);
       context.mergeState({ room });
     });
 

@@ -72,6 +72,12 @@ export class SyncSound {
         //console.error('socket-disconnecting error:', err);
       }
     });
+    //Kevin Changed
+    socket.on(ToServerEvents.ssroomUserNameChange, (changedUserName) => {
+      if (!changedUserName) return console.warn('DID THIS WORK?: No name');
+      socket.to(changedUserName.room.roomName).emit(ToClientEvents.ssroomUserChangedName, changedUserName);
+      console.log('ssroomUserNameChange', changedUserName);
+    });
 
     socket.on(ToServerEvents.sschatSend, (message) => {
       if (!message) return console.warn('sschatSend: No message');

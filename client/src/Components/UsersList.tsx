@@ -2,6 +2,7 @@ import React, { useContext, useState, useRef } from 'react';
 import { StateContext } from '../lib';
 import { styled } from 'styled-components';
 import { IUser } from 'shared';
+import { ToServerEvents } from 'shared';
 
 const UsersListContainer = styled.div`
   display: flex;
@@ -34,17 +35,26 @@ const UsersBadge = styled.span`
   top: 0.25rem;
   cursor: pointer;
 `;
-const LiPadding = styled.input``;
+const LiPadding = styled.input`
+  font-size: 1rem;
+  padding: 0.25rem 0;
+  border-radius: 5px;
+  width: 100%;
+  &:focus {
+    outline: none;
+    border-color: #3ac6e0;
+    box-shadow: 0 0 4px #3ac6e0;
+  }
+`;
 
 const NameForm = styled.span`
   display: flex;
   justify-content: space-between;
 `;
 
-const UsersLi = styled.span`
+const UsersLi = styled.div`
   display: flex;
   justify-content: space-between;
-  margin: 0.25rem 0;
 `;
 
 const RowReverse = styled.div`
@@ -57,14 +67,14 @@ export const UsersList: React.FC = () => {
   const [editingName, setEditingName] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const { state, mergeState } = useContext(StateContext);
-  const { room, user } = state;
+  const { room, user, socket } = state;
   console.log('Current user?', user?.username);
 
   const mapUsersList = (roomUser: IUser, index: number) => {
     // if (users.username !== user?.username)
     return (
       <UsersLi key={index} style={{ order: roomUser.username !== user?.username ? '1' : '0' }}>
-        <div>
+        <div style={{ padding: '0.25rem 0' }}>
           {roomUser.username}
           {roomUser.isHost && <span title="Host">👑</span>}
         </div>
@@ -91,6 +101,7 @@ export const UsersList: React.FC = () => {
   const handleNameChange: React.FormEventHandler = (event: React.KeyboardEvent) => {
     console.log('change name');
     event.preventDefault();
+    if (!nameInputRef.current?.value.trim().length) return;
     if (user?.username && room?.users && typeof nameInputRef.current?.value === 'string') {
       const newName = nameInputRef.current?.value; //TODO: consolidate username source
       const users = room?.users.map((roomUser) => {
@@ -102,8 +113,10 @@ export const UsersList: React.FC = () => {
         }
         return roomUser;
       });
-      const newUser = { ...user, username: newName };
+      console.log('New Users?', users);
+      const newUser: IUser = { ...user, username: newName };
       mergeState({ user: newUser, room: { ...room, users } });
+      socket.emit(ToServerEvents.ssroomUserNameChange, { room: { ...room, users }, user: newUser });
       setEditingName(false);
     }
   };
