@@ -1,6 +1,13 @@
 import http from 'http';
 import { Server, Socket } from 'socket.io';
-import { ClientToServerEvents, IChatMessage, ServerToClientEvents, ToClientEvents, ToServerEvents } from 'shared';
+import {
+  ClientToServerEvents,
+  IChatMessage,
+  IUser,
+  ServerToClientEvents,
+  ToClientEvents,
+  ToServerEvents,
+} from 'shared';
 import { Room } from '.';
 
 interface SyncSoundConfig {
@@ -74,9 +81,17 @@ export class SyncSound {
     });
     //Kevin Changed
     socket.on(ToServerEvents.ssroomUserNameChange, (changedUserName) => {
-      if (!changedUserName) return console.warn('DID THIS WORK?: No name');
-      socket.to(changedUserName.room.roomName).emit(ToClientEvents.ssroomUserChangedName, changedUserName);
+      if (!changedUserName) return console.warn('ssroomUserNameChange: No name');
+      const room = this._room.getRoom(changedUserName.roomName);
+      const socketId = this._room.getUserBySocketId(changedUserName.roomName, socket.id);
+      if (!room) return console.warn('ssplaylistAdd: Room not found');
+      const findUserIndex = (user: IUser) => user.socketId === socketId?.socketId;
+      const userIndex = room?.users.findIndex(findUserIndex);
+      room.users[userIndex].username = changedUserName.users[userIndex].username;
+      socket.to(changedUserName.roomName).emit(ToClientEvents.ssroomUserChangedName, changedUserName);
       console.log('ssroomUserNameChange', changedUserName);
+      console.log('WHAT IS ROOM', room);
+      console.log('WHAT IS SOCKETID', socketId);
     });
 
     socket.on(ToServerEvents.sschatSend, (message) => {

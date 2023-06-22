@@ -49,10 +49,15 @@ export class SyncSoundClient {
       context.mergeState({ room });
     });
     //Kevin Change
-    this.socket.on(ToClientEvents.ssroomUserChangedName, (newName) => {
-      if (!newName) return console.warn('ssroomUserJoined: No room');
-      console.log('KEVINS console newName', newName);
-      const { room, user } = newName;
+    // this.socket.on(ToClientEvents.ssroomChangedName, (payload) => {
+    //   if (!payload?.room) return console.warn('ssroomChangedName: No room');
+    //   if (!payload?.user) return console.warn('ssroomChangedName: No user');
+    //   context.mergeState({ ...payload });
+    // });
+
+    this.socket.on(ToClientEvents.ssroomUserChangedName, (room) => {
+      if (!room) return console.warn('ssroomUserChangedName: No room');
+      console.log('KEVINS console room', room);
       console.log('change name?', room);
       context.mergeState({ room });
     });

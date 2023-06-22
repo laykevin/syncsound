@@ -116,7 +116,7 @@ export const UsersList: React.FC = () => {
       console.log('New Users?', users);
       const newUser: IUser = { ...user, username: newName };
       mergeState({ user: newUser, room: { ...room, users } });
-      socket.emit(ToServerEvents.ssroomUserNameChange, { room: { ...room, users }, user: newUser });
+      socket.emit(ToServerEvents.ssroomUserNameChange, { ...room, users });
       setEditingName(false);
     }
   };
