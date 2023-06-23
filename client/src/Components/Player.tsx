@@ -3,7 +3,17 @@ import { StateContext } from '../lib';
 import { styled } from 'styled-components';
 
 const PlayerContainer = styled.div`
+  position: relative;
+  overflow: hidden;
+  width: 100%;
   margin: 1rem;
+`;
+
+const ResponsiveIFrame = styled.iframe`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 `;
 
 export const Player: React.FC = () => {
@@ -13,15 +23,15 @@ export const Player: React.FC = () => {
   return (
     <PlayerContainer id="player-container">
       {room?.playlist[0] && (
-        <iframe
-          width={1520 / 2}
-          height={594 / 4}
+        <ResponsiveIFrame
+          // width={1520 / 2}
+          // height={594 / 4}
           src={room.playlist[0].src}
           title={room.playlist[0].title}
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen={false}
-        ></iframe>
+        ></ResponsiveIFrame>
       )}
     </PlayerContainer>
   );

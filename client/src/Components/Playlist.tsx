@@ -8,6 +8,7 @@ const PlaylistContainer = styled.div`
   padding: 1rem 1rem 0;
   margin: 1rem;
   height: 75vh;
+  width: 16rem;
   border: 1px solid black;
   border-radius: 4px;
   background-color: #ffffff;
@@ -86,21 +87,23 @@ export const Playlist: React.FC = () => {
   };
 
   return (
-    <PlaylistContainer>
-      <div>
+    <div>
+      <PlaylistContainer>
         <div>
-          <BlockBold>Now Playing</BlockBold>
-          <div>{room?.playlist && room.playlist.length > 0 ? room.playlist[0].title : 'Add a sound to begin!'}</div>
+          <div>
+            <BlockBold>Now Playing</BlockBold>
+            <div>{room?.playlist && room.playlist.length > 0 ? room.playlist[0].title : 'Add a sound to begin!'}</div>
+          </div>
+          <div>
+            <BlockBold>Up Next</BlockBold>
+            {room?.playlist && room.playlist.length > 1 && room.playlist.slice(1).map(mapPlaylist)}
+          </div>
         </div>
-        <div>
-          <BlockBold>Up Next</BlockBold>
-          {room?.playlist && room.playlist.length > 1 && room.playlist.slice(1).map(mapPlaylist)}
-        </div>
-      </div>
-      <form onSubmit={handleSend}>
-        <input type="text" name="sound" placeholder="Embed code..." required></input>
-        <button type="submit">Queue</button>
-      </form>
-    </PlaylistContainer>
+        <form onSubmit={handleSend}>
+          <input type="text" name="sound" placeholder="Embed code..." required></input>
+          <button type="submit">Queue</button>
+        </form>
+      </PlaylistContainer>
+    </div>
   );
 };

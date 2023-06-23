@@ -22,14 +22,15 @@ export enum ToClientEvents {
 export interface PayloadMap {
   //to server
   ssroomCreateOrJoin: string; //roomName
-  ssroomUserNameChange: IRoom; //Kevin Changed
+  ssroomUserNameChange: IRoom; //Kevin's code
   ssroomLeave: IUser;
   sschatSend: IChatMessage;
   ssplaylistAdd: ISound;
   //to client
   ssroomJoined: { room: IRoom; user: IUser };
   ssroomUserJoined: IRoom;
-  ssroomUserChangedName: IRoom; //Kevin Change
+  ssroomChangedName: { room: IRoom; user: IUser }; //Kevin's code
+  ssroomUserChangedName: IRoom; //Kevin's code
   ssroomLeft: { room: IRoom; user: IUser };
   ssroomUserLeft: IRoom;
   sschatSent: IChatMessage;
