@@ -3,6 +3,7 @@ import { IChatMessage, IRoom, ISound, IUser } from '.';
 
 export enum ToServerEvents {
   ssroomCreateOrJoin = 'ssroomCreateOrJoin',
+  ssroomUserNameChange = 'ssroomUserNameChange',
   ssroomLeave = 'ssroomLeave',
   sschatSend = 'sschatSend',
   ssplaylistAdd = 'ssplaylistAdd',
@@ -11,6 +12,7 @@ export enum ToServerEvents {
 export enum ToClientEvents {
   ssroomJoined = 'ssroomJoined',
   ssroomUserJoined = 'ssroomUserJoined',
+  ssroomUserChangedName = 'ssroomUserChangedName', //Kevin Change
   ssroomLeft = 'ssroomLeft',
   ssroomUserLeft = 'ssroomUserLeft',
   sschatSent = 'sschatSent',
@@ -20,12 +22,14 @@ export enum ToClientEvents {
 export interface PayloadMap {
   //to server
   ssroomCreateOrJoin: string; //roomName
+  ssroomUserNameChange: IRoom; //Kevin Changed
   ssroomLeave: IUser;
   sschatSend: IChatMessage;
   ssplaylistAdd: ISound;
   //to client
   ssroomJoined: { room: IRoom; user: IUser };
   ssroomUserJoined: IRoom;
+  ssroomUserChangedName: IRoom; //Kevin Change
   ssroomLeft: { room: IRoom; user: IUser };
   ssroomUserLeft: IRoom;
   sschatSent: IChatMessage;
