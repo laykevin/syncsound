@@ -88,6 +88,8 @@ export class SyncSound {
       const findUserIndex = (user: IUser) => user.socketId === socketId?.socketId;
       const userIndex = room?.users.findIndex(findUserIndex);
       room.users[userIndex].username = changedUserName.users[userIndex].username;
+      // const activeUser = room.users.find((user: IUser) => user.socketId === socketId?.socketId);
+      // activeUser?.username = changedUserName.
       socket.to(changedUserName.roomName).emit(ToClientEvents.ssroomUserChangedName, changedUserName);
       console.log('ssroomUserNameChange', changedUserName);
       console.log('WHAT IS ROOM', room);
