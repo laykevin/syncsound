@@ -3,15 +3,11 @@ import { StateContext } from '../lib';
 import { styled } from 'styled-components';
 
 const PlayerContainer = styled.div`
-  position: relative;
-  overflow: hidden;
   width: 100%;
   margin: 1rem;
 `;
 
 const ResponsiveIFrame = styled.iframe`
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
 `;
