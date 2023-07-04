@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef } from 'react';
-import { StateContext } from '../lib';
+import { StateContext, SyncSoundClient } from '../lib';
 import { styled } from 'styled-components';
 import { IUser } from 'shared';
 import { ToServerEvents } from 'shared';
@@ -66,8 +66,9 @@ export const UsersList: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [editingName, setEditingName] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const { state, mergeState } = useContext(StateContext);
-  const { room, user, socket } = state;
+  const { state } = useContext(StateContext);
+  const { room, socket } = state;
+  const user = SyncSoundClient.getCurrentUser(state);
   console.log('Current user?', user?.username);
 
   const mapUsersList = (roomUser: IUser, index: number) => {
@@ -87,38 +88,25 @@ export const UsersList: React.FC = () => {
     );
   };
 
-  const UsersLiComponent: React.FC = () => {
-    return (
-      <UsersLi>
-        {user?.isHost ? <span title="Host">{user.username}👑</span> : user?.username}
-        <button onClick={() => setEditingName(true)} title="Change Name">
-          🖊️
-        </button>
-      </UsersLi>
-    );
-  };
+  // const UsersLiComponent: React.FC = () => {
+  //   return (
+  //     <UsersLi>
+  //       {user?.isHost ? <span title="Host">{user.username}👑</span> : user?.username}
+  //       <button onClick={() => setEditingName(true)} title="Change Name">
+  //         🖊️
+  //       </button>
+  //     </UsersLi>
+  //   );
+  // };
 
   const handleNameChange: React.FormEventHandler = (event: React.KeyboardEvent) => {
-    console.log('change name');
+    console.log('<UsersList>: handleNameChange', nameInputRef.current);
     event.preventDefault();
-    if (!nameInputRef.current?.value.trim().length) return;
-    if (user?.username && room?.users && typeof nameInputRef.current?.value === 'string') {
-      const newName = nameInputRef.current?.value; //TODO: consolidate username source
-      const users = room?.users.map((roomUser) => {
-        if (roomUser.username === user.username) {
-          return {
-            ...roomUser,
-            username: newName,
-          };
-        }
-        return roomUser;
-      });
-      console.log('New Users?', users);
-      const newUser: IUser = { ...user, username: newName };
-      mergeState({ user: newUser, room: { ...room, users } });
-      socket.emit(ToServerEvents.ssroomUserNameChange, { ...room, users });
-      setEditingName(false);
-    }
+    if (!room || !user) return;
+    if (typeof nameInputRef.current?.value !== 'string' || !nameInputRef.current.value.trim().length) return;
+    const newName = nameInputRef.current.value;
+    socket.emit(ToServerEvents.ssuserChangeName, { roomName: room.roomName, newName });
+    setEditingName(false);
   };
 
   const handleUsersButton = () => {

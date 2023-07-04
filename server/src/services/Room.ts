@@ -17,15 +17,20 @@ export class Room {
     return this.roomLookup[roomName];
   };
 
-  getNewUser = (roomName: string, socketId: string, isHost: boolean = false, username?: string): IUser => {
+  getNewUser = (socketId: string, isHost: boolean = false, username?: string): IUser => {
     if (!username) username = 'User' + Date.now().toString().slice(-5);
     console.log('Room.getNewUser', username, isHost);
-    return { socketId, roomName, username, isHost };
+    return { socketId, username, isHost };
   };
 
   createRoom = (roomName: string, socketId: string): void => {
     if (this.doesRoomExist(roomName)) return console.warn('Room.createRoom: Room already exists');
-    this.roomLookup[roomName] = { roomName, users: [this.getNewUser(roomName, socketId, true)], playlist: [] };
+    this.roomLookup[roomName] = {
+      roomName,
+      users: [this.getNewUser(socketId, true)],
+      playlist: [],
+      history: [],
+    };
     console.log('Room.createRoom:', this.roomLookup);
   };
 
@@ -37,17 +42,17 @@ export class Room {
 
   joinRoom = (roomName: string, socketId: string, user?: IUser): void => {
     if (!this.doesRoomExist(roomName)) return console.warn('Room.joinRoom: Room does not exist');
-    if (!user) user = this.getNewUser(roomName, socketId);
+    if (!user) user = this.getNewUser(socketId);
     this.roomLookup[roomName].users.push(user);
     console.log('Room.joinRoom:', this.roomLookup, user);
   };
 
-  leaveRoom = (roomName: string, username: string): void => {
+  leaveRoom = (roomName: string, socketId: string): void => {
     if (!this.doesRoomExist(roomName)) return console.warn('Room.leaveRoom: Room does not exist');
-    const userIndex = this.roomLookup[roomName].users.findIndex((user) => user.username === username);
+    const userIndex = this.roomLookup[roomName].users.findIndex((user) => user.socketId === socketId);
     if (userIndex < 0) return console.warn('Room.leaveRoom: User not found');
     this.roomLookup[roomName].users.splice(userIndex, 1);
-    console.log('Room.leaveRoom:', this.roomLookup, username);
+    console.log('Room.leaveRoom:', this.roomLookup, socketId);
   };
 
   getUserBySocketId = (roomName: string, socketId: string): IUser | null => {
@@ -63,5 +68,20 @@ export class Room {
     const user = this.roomLookup[roomName].users[userIndex];
     console.log('Room.getUserBySocketId:', this.roomLookup, user);
     return user;
+  };
+
+  getUserIndexBySocketId = (roomName: string, socketId: string): number | null => {
+    if (!this.doesRoomExist(roomName)) {
+      console.warn('Room.getUserIndexBySocketId: Room does not exist');
+      return null;
+    }
+    const userIndex = this.roomLookup[roomName].users.findIndex((user) => user.socketId === socketId);
+    if (userIndex < 0) {
+      console.warn('Room.getUserIndexBySocketId: User not found');
+      return null;
+    }
+    const user = this.roomLookup[roomName].users[userIndex];
+    console.log('Room.getUserIndexBySocketId:', this.roomLookup, userIndex, user);
+    return userIndex;
   };
 }

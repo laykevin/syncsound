@@ -1,8 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { styled } from 'styled-components';
-import { StateContext } from '../lib';
+import { StateContext, SyncSoundClient } from '../lib';
 import { IChatMessage } from 'shared';
-import { CSSTransition, Transition } from 'react-transition-group';
 import { ChatTextArea, UsersList } from '.';
 
 const Flex = styled.div`
@@ -94,10 +93,12 @@ const MessageOwner = styled.span`
 
 export const Chat: React.FC = () => {
   const { state } = useContext(StateContext);
-  const { user, chatLog } = state;
+  const { chatLog } = state;
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [opening, setOpening] = useState<boolean>(true);
   const chatBoxScrollRef = useRef<HTMLDivElement>(null);
+  const user = SyncSoundClient.getCurrentUser(state);
+
   //Keeps messaages scrolled to bottom
   useEffect(() => {
     if (chatBoxScrollRef.current) {

@@ -54,21 +54,18 @@ export class SyncSound {
       socket.join(roomName);
 
       const room = this._room.getRoom(roomName);
-      const user = this._room.getUserBySocketId(roomName, socket.id);
-      if (room && user) socket.emit(ToClientEvents.ssroomJoined, { room, user });
+      const userIndex = this._room.getUserIndexBySocketId(roomName, socket.id);
+      if (room && userIndex) socket.emit(ToClientEvents.ssroomJoined, { room, userIndex });
       console.log(`ssroomCreateOrJoin: Room ${doesRoomExist ? 'joined' : 'created'}`);
     });
 
-    socket.on(ToServerEvents.ssroomLeave, (user) => {
-      if (!user) return console.warn('ssroomLeave: No user');
-      const doesRoomExist = this._room.doesRoomExist(user.roomName);
+    socket.on(ToServerEvents.ssroomLeave, (roomName) => {
+      if (!roomName) return console.warn('ssroomLeave: No room');
+      const doesRoomExist = this._room.doesRoomExist(roomName);
       if (!doesRoomExist) return console.warn('ssroomLeave: Room not found');
-      this._room.leaveRoom(user.roomName, user.username);
-      socket.leave(user.roomName);
-
-      const room = this._room.getRoom(user.roomName);
-      if (room) socket.emit(ToClientEvents.ssroomLeft, { room, user });
-      console.log('ssroomLeave:', user);
+      this._room.leaveRoom(roomName, socket.id);
+      socket.leave(roomName);
+      console.log('ssroomLeave:', roomName, socket.id);
     });
 
     socket.on('disconnecting', (reason) => {
@@ -79,27 +76,25 @@ export class SyncSound {
         //console.error('socket-disconnecting error:', err);
       }
     });
-    //Kevin Changed
-    socket.on(ToServerEvents.ssroomUserNameChange, (changedUserName) => {
-      if (!changedUserName) return console.warn('ssroomUserNameChange: No name');
-      const room = this._room.getRoom(changedUserName.roomName);
-      const socketId = this._room.getUserBySocketId(changedUserName.roomName, socket.id);
-      if (!room) return console.warn('ssplaylistAdd: Room not found');
-      const findUserIndex = (user: IUser) => user.socketId === socketId?.socketId;
-      const userIndex = room?.users.findIndex(findUserIndex);
-      room.users[userIndex].username = changedUserName.users[userIndex].username;
-      // const activeUser = room.users.find((user: IUser) => user.socketId === socketId?.socketId);
-      // activeUser?.username = changedUserName.
-      socket.to(changedUserName.roomName).emit(ToClientEvents.ssroomUserChangedName, changedUserName);
-      console.log('ssroomUserNameChange', changedUserName);
-      console.log('WHAT IS ROOM', room);
-      console.log('WHAT IS SOCKETID', socketId);
-    });
 
     socket.on(ToServerEvents.sschatSend, (message) => {
       if (!message) return console.warn('sschatSend: No message');
       socket.to(message.roomName).emit(ToClientEvents.sschatSent, message);
       console.log('sschatSend: Chat sent', message);
+    });
+
+    socket.on(ToServerEvents.ssuserChangeName, (newNameData) => {
+      if (!newNameData) return console.warn('ssuserChangeName: No user name change data');
+      const { roomName, newName } = newNameData;
+      const room = this._room.getRoom(roomName);
+      if (!room) return console.warn('ssuserChangeName: Room not found');
+      const user = this._room.getUserBySocketId(roomName, socket.id);
+      if (!user) return console.warn('ssuserChangeName: User not found');
+      const previousName = user.username;
+      user.username = newName;
+      const systemChat = this.createSystemChat(roomName, `${previousName} has changed their name to ${newName}.`);
+      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      this._io.to(roomName).emit(ToClientEvents.ssuserNamedChanged, { room, previousName, newName });
     });
 
     socket.on(ToServerEvents.ssplaylistAdd, (sound) => {

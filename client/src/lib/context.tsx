@@ -11,7 +11,6 @@ interface StateProviderProps {
 export const StateContext = createContext<IStateContext>({
   state: {
     socket: io(),
-    user: null,
     room: null,
     chatLog: [],
   },
@@ -24,7 +23,6 @@ export const StateContext = createContext<IStateContext>({
 export const StateProvider: React.FC<StateProviderProps> = ({ socket, children }) => {
   const [state, setState] = useState<IState>({
     socket,
-    user: null,
     room: null,
     chatLog: [],
   });

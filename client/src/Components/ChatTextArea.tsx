@@ -1,7 +1,7 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { ToServerEvents } from 'shared';
-import { StateContext } from '../lib';
+import { StateContext, SyncSoundClient } from '../lib';
 
 const Flex = styled.div`
   display: flex;
@@ -36,9 +36,10 @@ const ChatTextarea = styled.textarea`
 
 export const ChatTextArea: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
-  const { socket, user, room } = state;
+  const { socket, room } = state;
   const [chatTextAreaValue, setChatTextAreaValue] = useState('');
   const chatTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  const user = SyncSoundClient.getCurrentUser(state);
 
   useEffect(() => {
     if (chatTextAreaRef.current) {
