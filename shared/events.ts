@@ -1,39 +1,36 @@
-import { IChatMessage, IRoom, ISound, IUser } from '.';
+import { IChatMessage, IRoom, ISound } from '.';
 // List of reserved event names: https://socket.io/docs/v4/emit-cheatsheet/#reserved-events
 
 export enum ToServerEvents {
   ssroomCreateOrJoin = 'ssroomCreateOrJoin',
-  ssroomUserNameChange = 'ssroomUserNameChange',
   ssroomLeave = 'ssroomLeave',
   sschatSend = 'sschatSend',
+  ssuserChangeName = 'ssuserChangeName',
   ssplaylistAdd = 'ssplaylistAdd',
 }
 
 export enum ToClientEvents {
   ssroomJoined = 'ssroomJoined',
   ssroomUserJoined = 'ssroomUserJoined',
-  ssroomUserChangedName = 'ssroomUserChangedName', //Kevin Change
-  ssroomLeft = 'ssroomLeft',
   ssroomUserLeft = 'ssroomUserLeft',
   sschatSent = 'sschatSent',
+  ssuserNamedChanged = 'ssuserNamedChanged',
   ssplaylistAdded = 'ssplaylistAdded',
 }
 
 export interface PayloadMap {
   //to server
   ssroomCreateOrJoin: string; //roomName
-  ssroomUserNameChange: IRoom; //Kevin's code
-  ssroomLeave: IUser;
+  ssroomLeave: string; //roomName
   sschatSend: IChatMessage;
+  ssuserChangeName: { roomName: string; newName: string };
   ssplaylistAdd: ISound;
   //to client
-  ssroomJoined: { room: IRoom; user: IUser };
+  ssroomJoined: { room: IRoom; userIndex: number };
   ssroomUserJoined: IRoom;
-  ssroomChangedName: { room: IRoom; user: IUser }; //Kevin's code
-  ssroomUserChangedName: IRoom; //Kevin's code
-  ssroomLeft: { room: IRoom; user: IUser };
   ssroomUserLeft: IRoom;
   sschatSent: IChatMessage;
+  ssuserNamedChanged: { room: IRoom; previousName: string; newName: string };
   ssplaylistAdded: IRoom;
 }
 
