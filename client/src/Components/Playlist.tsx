@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
 import { styled } from 'styled-components';
-import { StateContext, SyncSoundClient } from '../lib';
+import { StateContext, SocketController } from '../lib';
 import { ISound, SoundOrigin, ToServerEvents } from 'shared';
-import { Player } from './index';
 
 const PlaylistContainer = styled.div`
   padding: 1rem 1rem 0;
@@ -21,7 +20,7 @@ const BlockBold = styled.div`
 export const Playlist: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
   const { socket, room } = state;
-  const user = SyncSoundClient.getCurrentUser(state);
+  const user = SocketController.getCurrentUser(state);
 
   const handleSend: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();

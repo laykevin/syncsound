@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Chat, Playlist, Player } from '../components';
+import { Chat, Playlist, Player, PlayerControls } from '../components';
 
 interface RoomProps {
   roomName: string;
@@ -31,6 +31,9 @@ export const Room: React.FC<RoomProps> = ({ roomName }) => {
         <Player />
         <Chat />
       </FlexCenter>
+      <Container>
+        <PlayerControls />
+      </Container>
     </>
   );
 };

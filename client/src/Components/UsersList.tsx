@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef } from 'react';
-import { StateContext, SyncSoundClient } from '../lib';
+import { StateContext, SocketController } from '../lib';
 import { styled } from 'styled-components';
 import { IUser } from 'shared';
 import { ToServerEvents } from 'shared';
@@ -68,7 +68,7 @@ export const UsersList: React.FC = () => {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const { state } = useContext(StateContext);
   const { room, socket } = state;
-  const user = SyncSoundClient.getCurrentUser(state);
+  const user = SocketController.getCurrentUser(state);
   console.log('Current user?', user?.username);
 
   const mapUsersList = (roomUser: IUser, index: number) => {

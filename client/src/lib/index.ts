@@ -1,4 +1,4 @@
 export * from './App';
 export * from './context';
-export * from './SyncSoundClient';
+export * from './controllers';
 export * from './types';

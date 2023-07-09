@@ -1,13 +1,6 @@
 import http from 'http';
 import { Server, Socket } from 'socket.io';
-import {
-  ClientToServerEvents,
-  IChatMessage,
-  IUser,
-  ServerToClientEvents,
-  ToClientEvents,
-  ToServerEvents,
-} from 'shared';
+import { ClientToServerEvents, IChatMessage, ServerToClientEvents, ToClientEvents, ToServerEvents } from 'shared';
 import { Room } from '.';
 
 interface SyncSoundConfig {
@@ -112,29 +105,26 @@ export class SyncSound {
 
     this._io.sockets.adapter.on('join-room', (roomName, socketId) => {
       if (!this._room.doesRoomExist(roomName)) return console.warn('adapter-join-room: Room not found');
-
       const room = this._room.getRoom(roomName);
       const user = this._room.getUserBySocketId(roomName, socketId);
-      if (room && user) {
-        this._io.to(roomName).emit(ToClientEvents.ssroomUserJoined, room);
-        const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has joined the room!');
-        this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
-      }
+      if (!room || !user) return console.warn('adapter-join-room: User not found');
 
+      const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has joined the room!');
+      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      this._io.to(roomName).emit(ToClientEvents.ssroomUserJoined, room);
       console.log('adapter-join-room:', roomName, socketId);
     });
 
     this._io.sockets.adapter.on('leave-room', (roomName, socketId) => {
       if (!this._room.doesRoomExist(roomName)) return console.warn('adapter-leave-room: Room not found');
-
       const room = this._room.getRoom(roomName);
       const user = this._room.getUserBySocketId(roomName, socketId);
       if (!room || !user) return console.warn('adapter-leave-room: User not found');
+      this._room.leaveRoom(roomName, socketId);
 
-      this._io.to(roomName).emit(ToClientEvents.ssroomUserLeft, room);
-      this._room.leaveRoom(roomName, user.username);
       const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has left the room.');
       this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      this._io.to(roomName).emit(ToClientEvents.ssroomUserLeft, room);
 
       if (room.users.length <= 0) this._room.deleteRoom(roomName);
       console.log('adapter-leave-room:', roomName, socketId);

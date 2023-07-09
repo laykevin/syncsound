@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { styled } from 'styled-components';
-import { StateContext, SyncSoundClient } from '../lib';
+import { StateContext, SocketController } from '../lib';
 import { IChatMessage } from 'shared';
 import { ChatTextArea, UsersList } from '.';
 
@@ -97,7 +97,7 @@ export const Chat: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [opening, setOpening] = useState<boolean>(true);
   const chatBoxScrollRef = useRef<HTMLDivElement>(null);
-  const user = SyncSoundClient.getCurrentUser(state);
+  const user = SocketController.getCurrentUser(state);
 
   //Keeps messaages scrolled to bottom
   useEffect(() => {

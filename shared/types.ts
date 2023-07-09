@@ -1,3 +1,10 @@
+declare global {
+  interface Window {
+    SC: SC;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
 export interface IRoom {
   roomName: string;
   users: Array<IUser>;
@@ -28,4 +35,14 @@ export interface IChatMessage {
   roomName: IRoom['roomName'];
   username: IUser['username'] | 'System';
   message: string;
+}
+
+export interface SC {
+  Widget: (elementId: string) => SCWidget;
+}
+
+export interface SCWidget {
+  play: () => void;
+  pause: () => void;
+  bind: (eventName: string, listener: () => void) => void;
 }

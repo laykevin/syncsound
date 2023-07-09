@@ -1,8 +1,8 @@
 import { Socket, io } from 'socket.io-client';
 import { ClientToServerEvents, IRoom, IUser, ServerToClientEvents, ToClientEvents, ToServerEvents } from 'shared';
-import { IState, IStateContext } from '.';
+import { IState, IStateContext } from '..';
 
-export class SyncSoundClient {
+export class SocketController {
   public socket: Socket<ServerToClientEvents, ClientToServerEvents>;
 
   constructor() {
