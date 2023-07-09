@@ -7,6 +7,7 @@ export interface IState {
   readonly room: IRoom | null;
   readonly chatLog: Array<IChatMessage>;
   readonly player: PlayerController | null;
+  readonly isPlaying: boolean;
 }
 
 export type MergeState = (nextState: Partial<IState>) => void;

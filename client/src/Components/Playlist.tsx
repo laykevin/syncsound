@@ -70,18 +70,27 @@ export const Playlist: React.FC = () => {
     }
 
     const origin = src.includes(SoundOrigin.SC) ? SoundOrigin.SC : SoundOrigin.YT;
+
+    let title2 = '';
+    const title2AttrStart = embedCode.lastIndexOf('title="');
+    if (origin === SoundOrigin.SC && title2AttrStart > 0) {
+      const titleStart = title2AttrStart + 7;
+      const titleEnd = embedCode.indexOf('"', titleStart); //exclusive
+      title2 = titleEnd > 0 ? embedCode.substring(titleStart, titleEnd) : '';
+    }
+
     const addedBy = user.username;
     const { roomName } = room;
 
     if (origin === SoundOrigin.YT && !src.includes(SoundOrigin.YT)) console.warn('Unknown sound origin');
-    return { src, title, origin, addedBy, roomName };
+    return { src, title, title2, origin, addedBy, roomName };
   };
 
-  const mapPlaylist = (sound: ISound, index: number) => {
+  const mapPlaylist = (sound: ISound, index?: number): JSX.Element => {
     return (
       <div key={index}>
         <div>{sound.title}</div>
-        <small>{sound.src}</small>
+        <small>{sound.title2}</small>
       </div>
     );
   };
@@ -92,7 +101,7 @@ export const Playlist: React.FC = () => {
         <div>
           <div>
             <BlockBold>Now Playing</BlockBold>
-            <div>{room?.playlist && room.playlist.length > 0 ? room.playlist[0].title : 'Add a sound to begin!'}</div>
+            {room?.playlist && room.playlist.length ? mapPlaylist(room.playlist[0]) : <div>Add a sound to begin!</div>}
           </div>
           <div>
             <BlockBold>Up Next</BlockBold>

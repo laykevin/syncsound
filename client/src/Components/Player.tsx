@@ -8,7 +8,12 @@ const PlayerContainer = styled.div`
   margin: 1rem;
 `;
 
-const ResponsiveIFrame = styled.iframe`
+const FluidDiv = styled.div`
+  width: 100%;
+  height: 100%;
+`;
+
+const FluidIFrame = styled.iframe`
   width: 100%;
   height: 100%;
 `;
@@ -21,33 +26,33 @@ export const Player: React.FC = () => {
     const updatePlayer = async () => {
       if (player != null || !room || !room.playlist.length) return;
       const currentSound = room.playlist[0];
-      const newPlayer = new PlayerController(currentSound);
-      if (currentSound.origin === SoundOrigin.YT) {
-        const isLoaded = await newPlayer.loadYTPlayerAPI();
-      }
+      const newPlayer = new PlayerController(currentSound, mergeState);
       console.log('<Player>: Adding PlayerController for SC', currentSound, newPlayer);
       mergeState({ player: newPlayer });
     };
     updatePlayer();
   }, [player, room]);
 
-  return (
-    <PlayerContainer id="player-container">
-      {room?.playlist[0] && (
-        <div id="ssplayer"></div>
-        // <ResponsiveIFrame
-        //   // width={1520 / 2}
-        //   // height={594 / 4}
-        //   id="ssplayer"
-        //   src={room.playlist[0].src + `?enablejsapi=1&version=3&origin=${window.location.href}`}
-        //   title={room.playlist[0].title}
-        //   frameBorder="0"
-        //   // allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        //   allowFullScreen={false}
-        //   // @ts-ignore
-        //   enablejsapi="1"
-        // ></ResponsiveIFrame>
-      )}
-    </PlayerContainer>
-  );
+  const renderPlayer = (): JSX.Element | null => {
+    if (!room || !room.playlist.length) return null;
+    const currentSound = room.playlist[0];
+    if (currentSound.origin === SoundOrigin.SC)
+      return (
+        <FluidIFrame
+          // width={1520 / 2}
+          // height={594 / 4}
+          id="ssplayer"
+          src={currentSound.src}
+          title={currentSound.title}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen={false}
+          // @ts-ignore
+          enablejsapi="1"
+        ></FluidIFrame>
+      );
+    return <FluidDiv id="ssplayer"></FluidDiv>;
+  };
+
+  return <PlayerContainer id="player-container">{renderPlayer()}</PlayerContainer>;
 };

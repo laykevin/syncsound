@@ -21,6 +21,7 @@ export interface IUser {
 export interface ISound {
   src: string;
   title: string;
+  title2?: string;
   origin: SoundOrigin;
   addedBy: IUser['username'];
   roomName: IRoom['roomName'];

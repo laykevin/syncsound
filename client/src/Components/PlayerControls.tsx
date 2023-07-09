@@ -9,17 +9,15 @@ const FlexCenter = styled.div`
 `;
 
 export const PlayerControls: React.FC = () => {
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [volume, setVolume] = useState<string>('100');
   const { state } = useContext(StateContext);
-  const { room, player } = state;
+  const { room, player, isPlaying } = state;
 
   const handlePlay = () => {
     if (!player) return console.warn('<PlayerControls>: No player');
     if (isPlaying) player.pause();
     else player.play();
-    setIsPlaying((prev) => !prev);
   };
 
   const isPlayEnabled = !!room?.playlist[0] && !!player;

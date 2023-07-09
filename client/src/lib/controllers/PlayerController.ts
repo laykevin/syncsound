@@ -1,26 +1,42 @@
 import { ISound, SCWidget, SoundOrigin, ToClientEvents } from 'shared';
+import { MergeState } from '../types';
 
 export class PlayerController {
   readonly elementId: string = 'ssplayer';
   readonly scriptId: string = 'ssplayerScript';
   readonly timeout: number = 250;
   sound: ISound;
+  mergeState: MergeState;
   player: YT.Player | SCWidget | null = null;
   isYTPlayerAPIReady: boolean = false;
 
-  constructor(sound: ISound) {
+  constructor(sound: ISound, mergeState: MergeState) {
     this.sound = sound;
-    document.addEventListener(ToClientEvents.ssplayerReady, this.onPlayerReady);
+    this.mergeState = mergeState;
+    if (sound.origin === SoundOrigin.SC) {
+      this.player = window.SC.Widget(this.elementId);
+    } else if (sound.origin === SoundOrigin.YT) {
+      document.removeEventListener(ToClientEvents.ssplayerReady, this.onPlayerReady);
+      document.addEventListener(ToClientEvents.ssplayerReady, this.onPlayerReady);
+      this.loadYTPlayerAPI();
+    }
   }
 
   onPlayerReady = () => {
     this.isYTPlayerAPIReady = true;
     this.player = new YT.Player(this.elementId, {
       videoId: this.getYTVideoId(this.sound.src),
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        enablejsapi: 1,
+        fs: 0,
+      },
       events: {
         onReady: (event: YT.PlayerEvent) => {
           console.log('YTPlayerController: onPlayerReady', event);
         },
+        onStateChange: this.onStateChange,
       },
     });
   };
@@ -74,12 +90,31 @@ export class PlayerController {
   };
 
   play = (): void => {
-    if (this.sound.origin === SoundOrigin.SC) (<SCWidget>this.player).play();
-    else (<YT.Player>this.player).playVideo();
+    if (this.sound.origin === SoundOrigin.SC) {
+      (<SCWidget>this.player).play();
+      this.mergeState({ isPlaying: true });
+    } else if (this.sound.origin === SoundOrigin.YT) {
+      (<YT.Player>this.player).playVideo();
+      this.mergeState({ isPlaying: true });
+    }
   };
 
   pause = (): void => {
-    if (this.sound.origin === SoundOrigin.SC) (<SCWidget>this.player).pause();
-    else (<YT.Player>this.player).pauseVideo();
+    if (this.sound.origin === SoundOrigin.SC) {
+      (<SCWidget>this.player).pause();
+      this.mergeState({ isPlaying: false });
+    } else if (this.sound.origin === SoundOrigin.YT) {
+      (<YT.Player>this.player).pauseVideo();
+      this.mergeState({ isPlaying: false });
+    }
+  };
+
+  onStateChange = (event: YT.OnStateChangeEvent) => {
+    if (event.data === YT.PlayerState.PLAYING) {
+      this.mergeState({ isPlaying: true });
+    }
+    if (event.data === YT.PlayerState.PAUSED) {
+      this.mergeState({ isPlaying: false });
+    }
   };
 }
