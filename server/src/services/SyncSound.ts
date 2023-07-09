@@ -95,8 +95,9 @@ export class SyncSound {
       const room = this._room.getRoom(sound.roomName);
       if (!room) return console.warn('ssplaylistAdd: Room not found');
       room.playlist.push(sound);
-      socket.to(sound.roomName).emit(ToClientEvents.ssplaylistAdded, room);
-      console.log('ssplaylistAdd: Sound added', sound);
+      const systemChat = this.createSystemChat(sound.roomName, `${sound.addedBy} has queued the track ${sound.title}!`);
+      this._io.to(sound.roomName).emit(ToClientEvents.sschatSent, systemChat);
+      this._io.to(sound.roomName).emit(ToClientEvents.ssplaylistAdded, room);
     });
   };
 

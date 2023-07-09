@@ -18,7 +18,7 @@ const BlockBold = styled.div`
 `;
 
 export const Playlist: React.FC = () => {
-  const { state, mergeState } = useContext(StateContext);
+  const { state } = useContext(StateContext);
   const { socket, room } = state;
   const user = SocketController.getCurrentUser(state);
 
@@ -30,12 +30,9 @@ export const Playlist: React.FC = () => {
     const formJson = Object.fromEntries<string>(formData.entries() as Iterable<readonly [PropertyKey, string]>);
     const sound = extractSoundData(formJson.sound);
     if (!sound) return;
-    const nextRoom = { ...room };
-    nextRoom.playlist = [...room.playlist, sound];
-    mergeState({ room: nextRoom });
     socket.emit(ToServerEvents.ssplaylistAdd, sound);
     form.reset();
-    console.log('<Playlist>: ', event, state, formJson, sound);
+    console.log('<Playlist>:', event, state, formJson, sound);
   };
 
   const extractSoundData = (embedCode: string): ISound | null => {

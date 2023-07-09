@@ -8,6 +8,7 @@ window.onYouTubeIframeAPIReady = function (): void {
   const event = new Event(ToClientEvents.ssplayerReady);
   document.dispatchEvent(event);
   console.log('onYouTubeIframeAPIReady', event, YT);
+  console.timeEnd('loadYTPlayerAPI');
 };
 
 const queryStringParams = new URLSearchParams(window.location.search);

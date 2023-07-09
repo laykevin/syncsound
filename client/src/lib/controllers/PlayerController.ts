@@ -3,10 +3,11 @@ import { MergeState } from '../types';
 
 export class PlayerController {
   // @ts-ignore
-  readonly scEvents: SCEvents = window.SC.Widget.Events;
-  readonly elementId: string = 'ssplayer';
-  readonly scriptId: string = 'ssplayerScript';
-  readonly timeout: number = 250;
+  private readonly scEvents: SCEvents = window.SC.Widget.Events;
+  private readonly elementId: string = 'ssplayer';
+  private readonly scriptId: string = 'ssplayerScript';
+  private readonly timeout: number = 250;
+
   sound: ISound;
   mergeState: MergeState;
   player: YT.Player | SCWidget | null = null;
@@ -25,7 +26,8 @@ export class PlayerController {
     }
   }
 
-  onPlayerReady = (): void => {
+  // YOUTUBE METHODS
+  private onPlayerReady = (): void => {
     this.isYTPlayerAPIReady = true;
     this.player = new YT.Player(this.elementId, {
       videoId: this.getYTVideoId(this.sound.src),
@@ -36,16 +38,19 @@ export class PlayerController {
         fs: 0,
       },
       events: {
-        onReady: (event: YT.PlayerEvent) => {
-          console.log('YTPlayerController: onPlayerReady', event);
-        },
+        onReady: (event: YT.PlayerEvent) => console.log('(YT): onReady', event, event.target),
         onStateChange: this.onStateChange,
       },
     });
   };
 
-  loadYTPlayerAPI = async (): Promise<boolean> => {
-    if (this.sound.origin !== SoundOrigin.YT) return Promise.reject('No YouTube data');
+  private onStateChange = (event: YT.OnStateChangeEvent): void => {
+    if (event.data === YT.PlayerState.PLAYING) this.mergeState({ isPlaying: true });
+    if (event.data === YT.PlayerState.PAUSED) this.mergeState({ isPlaying: false });
+  };
+
+  private loadYTPlayerAPI = (): void => {
+    if (this.sound.origin !== SoundOrigin.YT) return;
     this.isYTPlayerAPIReady = false;
     this.player = null;
     const existing = document.getElementById(this.scriptId);
@@ -57,34 +62,24 @@ export class PlayerController {
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
-    return new Promise((res, rej) => {
-      console.log(
-        'PlayerController.loadYTPlayerAPI: Loading YouTube Player API...',
-        tag,
-        firstScriptTag,
-        this.isYTPlayerAPIReady
-      );
-      setTimeout(() => {
-        if (this.isYTPlayerAPIReady && this.player) {
-          console.log('PlayerController.loadYTPlayerAPI: Completed loading YouTube Player API!');
-          res(true);
-        } else {
-          console.log('PlayerController.loadYTPlayerAPI: Waiting for YouTube Player API...');
-          setTimeout(() => {
-            if (this.isYTPlayerAPIReady && this.player) {
-              console.log('PlayerController.loadYTPlayerAPI: Completed loading YouTube Player API! (2)');
-              res(true);
-            } else {
-              console.warn('PlayerController.loadYTPlayerAPI: Could not load YouTube Player API');
-              rej('Timeout');
-            }
-          }, this.timeout);
-        }
-      }, this.timeout);
-    });
+    console.log('loadYTPlayerAPI: Loading YouTube Player API...', tag, firstScriptTag);
+    console.time('loadYTPlayerAPI');
+
+    setTimeout(() => {
+      if (this.isYTPlayerAPIReady && this.player)
+        console.log('loadYTPlayerAPI: Completed loading YouTube Player API!', this.player, this.sound);
+      else {
+        console.log('loadYTPlayerAPI: Waiting for YouTube Player API...');
+        setTimeout(() => {
+          if (this.isYTPlayerAPIReady && this.player)
+            console.log('loadYTPlayerAPI: Completed loading YouTube Player API! (2)', this.player, this.sound);
+          else console.warn('loadYTPlayerAPI: Could not load YouTube Player API');
+        }, this.timeout);
+      }
+    }, this.timeout);
   };
 
-  getYTVideoId = (src: string): string => {
+  private getYTVideoId = (src: string): string => {
     const lastSlashIndex = src.lastIndexOf('/');
     if (lastSlashIndex < 0) {
       console.warn('getYTVideoId: Could not get YouTube video ID');
@@ -93,17 +88,15 @@ export class PlayerController {
     return src.substring(lastSlashIndex + 1);
   };
 
-  loadSCWidget = (): void => {
+  // SOUNDCLOUD METHODS
+  private loadSCWidget = (): void => {
     if (!this.player || this.sound.origin !== SoundOrigin.SC) return;
-    (<SCWidget>this.player).bind(this.scEvents.PLAY, () => {
-      this.mergeState({ isPlaying: true });
-    });
-    (<SCWidget>this.player).bind(this.scEvents.PAUSE, () => {
-      this.mergeState({ isPlaying: false });
-    });
+    (<SCWidget>this.player).bind(this.scEvents.PLAY, () => this.mergeState({ isPlaying: true }));
+    (<SCWidget>this.player).bind(this.scEvents.PAUSE, () => this.mergeState({ isPlaying: false }));
   };
 
-  play = (): void => {
+  // SHARED METHODS
+  public play = (): void => {
     if (this.sound.origin === SoundOrigin.SC) {
       (<SCWidget>this.player).play();
       this.mergeState({ isPlaying: true });
@@ -113,21 +106,12 @@ export class PlayerController {
     }
   };
 
-  pause = (): void => {
+  public pause = (): void => {
     if (this.sound.origin === SoundOrigin.SC) {
       (<SCWidget>this.player).pause();
       this.mergeState({ isPlaying: false });
     } else if (this.sound.origin === SoundOrigin.YT) {
       (<YT.Player>this.player).pauseVideo();
-      this.mergeState({ isPlaying: false });
-    }
-  };
-
-  onStateChange = (event: YT.OnStateChangeEvent): void => {
-    if (event.data === YT.PlayerState.PLAYING) {
-      this.mergeState({ isPlaying: true });
-    }
-    if (event.data === YT.PlayerState.PAUSED) {
       this.mergeState({ isPlaying: false });
     }
   };
