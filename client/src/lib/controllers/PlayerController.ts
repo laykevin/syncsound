@@ -1,7 +1,9 @@
-import { ISound, SCWidget, SoundOrigin, ToClientEvents } from 'shared';
+import { ISound, SCEvents, SCWidget, SoundOrigin, ToClientEvents } from 'shared';
 import { MergeState } from '../types';
 
 export class PlayerController {
+  // @ts-ignore
+  readonly scEvents: SCEvents = window.SC.Widget.Events;
   readonly elementId: string = 'ssplayer';
   readonly scriptId: string = 'ssplayerScript';
   readonly timeout: number = 250;
@@ -15,6 +17,7 @@ export class PlayerController {
     this.mergeState = mergeState;
     if (sound.origin === SoundOrigin.SC) {
       this.player = window.SC.Widget(this.elementId);
+      this.loadSCWidget();
     } else if (sound.origin === SoundOrigin.YT) {
       document.removeEventListener(ToClientEvents.ssplayerReady, this.onPlayerReady);
       document.addEventListener(ToClientEvents.ssplayerReady, this.onPlayerReady);
@@ -22,13 +25,13 @@ export class PlayerController {
     }
   }
 
-  onPlayerReady = () => {
+  onPlayerReady = (): void => {
     this.isYTPlayerAPIReady = true;
     this.player = new YT.Player(this.elementId, {
       videoId: this.getYTVideoId(this.sound.src),
       playerVars: {
         autoplay: 0,
-        controls: 0,
+        // controls: 0,
         enablejsapi: 1,
         fs: 0,
       },
@@ -42,6 +45,7 @@ export class PlayerController {
   };
 
   loadYTPlayerAPI = async (): Promise<boolean> => {
+    if (this.sound.origin !== SoundOrigin.YT) return Promise.reject('No YouTube data');
     this.isYTPlayerAPIReady = false;
     this.player = null;
     const existing = document.getElementById(this.scriptId);
@@ -72,7 +76,7 @@ export class PlayerController {
               res(true);
             } else {
               console.warn('PlayerController.loadYTPlayerAPI: Could not load YouTube Player API');
-              rej('timeout');
+              rej('Timeout');
             }
           }, this.timeout);
         }
@@ -87,6 +91,16 @@ export class PlayerController {
       return '';
     }
     return src.substring(lastSlashIndex + 1);
+  };
+
+  loadSCWidget = (): void => {
+    if (!this.player || this.sound.origin !== SoundOrigin.SC) return;
+    (<SCWidget>this.player).bind(this.scEvents.PLAY, () => {
+      this.mergeState({ isPlaying: true });
+    });
+    (<SCWidget>this.player).bind(this.scEvents.PAUSE, () => {
+      this.mergeState({ isPlaying: false });
+    });
   };
 
   play = (): void => {
@@ -109,7 +123,7 @@ export class PlayerController {
     }
   };
 
-  onStateChange = (event: YT.OnStateChangeEvent) => {
+  onStateChange = (event: YT.OnStateChangeEvent): void => {
     if (event.data === YT.PlayerState.PLAYING) {
       this.mergeState({ isPlaying: true });
     }

@@ -53,3 +53,17 @@ export type ClientToServerEvents = {
 export type ServerToClientEvents = {
   [event in keyof typeof ToClientEvents]: (payload?: PayloadMap[event], callback?: Function) => void;
 };
+
+export interface SCEvents {
+  LOAD_PROGRESS: 'loadProgress';
+  PLAY_PROGRESS: 'playProgress';
+  PLAY: 'play';
+  PAUSE: 'pause';
+  FINISH: 'finish';
+  SEEK: 'seek';
+  READY: 'ready';
+  CLICK_DOWNLOAD: 'downloadClicked';
+  CLICK_BUY: 'buyClicked';
+  OPEN_SHARE_PANEL: 'sharePanelOpened';
+  ERROR: 'error';
+}
