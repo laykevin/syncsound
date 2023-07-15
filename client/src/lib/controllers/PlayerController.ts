@@ -8,7 +8,6 @@ export class PlayerController {
   private readonly scriptId: string = 'ssplayerScript';
   private readonly timeout: number = 250;
   private isYTPlayerAPIReady: boolean = false;
-  private scPlayOriginal?: () => void;
 
   sound: ISound;
   setState: IStateContext['setState'];
