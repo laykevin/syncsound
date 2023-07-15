@@ -1,4 +1,4 @@
-import { IChatMessage, IRoom, ISound, IUser } from '.';
+import { IChatMessage, IRoom, IRoomUser, ISound, IUser } from '.';
 // List of reserved event names: https://socket.io/docs/v4/emit-cheatsheet/#reserved-events
 
 export enum ToServerEvents {
@@ -29,10 +29,10 @@ export interface PayloadMap {
   ssroomCreateOrJoin: string; //roomName
   ssroomLeave: string; //roomName
   sschatSend: IChatMessage;
-  ssuserChangeName: { roomName: string; newName: string };
+  ssuserChangeName: IRoomUser;
   ssplaylistAdd: ISound;
-  ssplayerPlay: IUser;
-  ssplayerPause: IUser;
+  ssplayerPlay: IRoomUser;
+  ssplayerPause: IRoomUser;
   //to client
   ssroomJoined: { room: IRoom; userIndex: number };
   ssroomUserJoined: IRoom;

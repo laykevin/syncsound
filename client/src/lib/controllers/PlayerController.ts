@@ -7,11 +7,11 @@ export class PlayerController {
   private readonly elementId: string = 'ssplayer';
   private readonly scriptId: string = 'ssplayerScript';
   private readonly timeout: number = 250;
+  private isYTPlayerAPIReady: boolean = false;
 
   sound: ISound;
   mergeState: MergeState;
   player: YT.Player | SCWidget | null = null;
-  isYTPlayerAPIReady: boolean = false;
 
   constructor(sound: ISound, mergeState: MergeState) {
     this.sound = sound;
@@ -91,28 +91,53 @@ export class PlayerController {
   // SOUNDCLOUD METHODS
   private loadSCWidget = (): void => {
     if (!this.player || this.sound.origin !== SoundOrigin.SC) return;
-    (<SCWidget>this.player).bind(this.scEvents.PLAY, () => this.mergeState({ isPlaying: true }));
-    (<SCWidget>this.player).bind(this.scEvents.PAUSE, () => this.mergeState({ isPlaying: false }));
+    (<SCWidget>this.player).bind(this.scEvents.PLAY, () => {
+      console.log('PlayerController.loadSCWidget PLAY');
+      this.mergeState({ isPlaying: true });
+    });
+    (<SCWidget>this.player).bind(this.scEvents.PAUSE, () => {
+      console.log('PlayerController.loadSCWidget PAUSE');
+      this.mergeState({ isPlaying: false });
+    });
   };
 
   // SHARED METHODS
   public play = (): void => {
     if (this.sound.origin === SoundOrigin.SC) {
+      console.log('PlayerController.play');
       (<SCWidget>this.player).play();
-      this.mergeState({ isPlaying: true });
     } else if (this.sound.origin === SoundOrigin.YT) {
       (<YT.Player>this.player).playVideo();
-      this.mergeState({ isPlaying: true });
     }
   };
 
   public pause = (): void => {
     if (this.sound.origin === SoundOrigin.SC) {
+      console.log('PlayerController.pause');
       (<SCWidget>this.player).pause();
-      this.mergeState({ isPlaying: false });
     } else if (this.sound.origin === SoundOrigin.YT) {
       (<YT.Player>this.player).pauseVideo();
-      this.mergeState({ isPlaying: false });
     }
+  };
+
+  public isPlayerPaused = async (): Promise<boolean> => {
+    if (!this.player) return Promise.resolve(false);
+    if (this.sound.origin === SoundOrigin.SC) {
+      return new Promise((res, rej) => {
+        (<SCWidget>this.player).isPaused((result) => {
+          if (typeof result !== 'boolean') {
+            console.warn('isPlayerPaused (SC): Unexpected result', result);
+            rej('Unexpected result');
+          }
+          console.log('isPlayerPaused (SC):', result);
+          res(result);
+        });
+      });
+    } else if (this.sound.origin === SoundOrigin.YT) {
+      const playerState = (<YT.Player>this.player).getPlayerState();
+      console.log('isPlayerPaused (YT):', playerState);
+      return Promise.resolve(playerState !== YT.PlayerState.PLAYING);
+    }
+    return Promise.resolve(false);
   };
 }

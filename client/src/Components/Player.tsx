@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
-import { PlayerController, StateContext } from '../lib';
+import { PlayerController, SocketController, StateContext } from '../lib';
 import { styled } from 'styled-components';
-import { SoundOrigin } from 'shared';
+import { SoundOrigin, ToServerEvents } from 'shared';
 
 const PlayerContainer = styled.div`
   width: 100%;
@@ -15,7 +15,8 @@ const FluidDiv = styled.div`
 
 export const Player: React.FC = () => {
   const { state, mergeState } = useContext(StateContext);
-  const { room, player } = state;
+  const { room, player, isPlaying, socket } = state;
+  const user = SocketController.getCurrentUser(state);
 
   useEffect(() => {
     if (player != null || !room || !room.playlist.length) return;
@@ -24,6 +25,23 @@ export const Player: React.FC = () => {
     console.log('<Player>: Adding PlayerController for SC', currentSound, newPlayer);
     mergeState({ player: newPlayer });
   }, [player, room]);
+
+  useEffect(() => {
+    const updatePlayerStatus = async () => {
+      if (!room || !user || !player?.player) return;
+      const isPlayerPaused = await player.isPlayerPaused();
+      console.log('<Player> useEffect [isPlaying]', 'isPlaying=' + isPlaying, 'isPlayerPaused=' + isPlayerPaused);
+
+      if (isPlaying) {
+        if (isPlayerPaused) player.play();
+        else socket.emit(ToServerEvents.ssplayerPlay, { roomName: room.roomName, username: user.username });
+      } else {
+        if (!isPlayerPaused) player.pause();
+        else socket.emit(ToServerEvents.ssplayerPause, { roomName: room.roomName, username: user.username });
+      }
+    };
+    updatePlayerStatus();
+  }, [isPlaying]);
 
   const renderPlayer = (): JSX.Element | null => {
     if (!room || !room.playlist.length) return null;

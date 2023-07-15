@@ -15,7 +15,7 @@ export const PlayerControls: React.FC = () => {
   const { room, player, isPlaying } = state;
 
   const handlePlay = () => {
-    if (!player) return console.warn('<PlayerControls>: No player');
+    if (!player || !room) return console.warn('<PlayerControls>: Missing data', player, room);
     if (isPlaying) player.pause();
     else player.play();
   };

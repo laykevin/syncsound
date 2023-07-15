@@ -76,18 +76,18 @@ export class SyncSound {
       console.log('sschatSend: Chat sent', message);
     });
 
-    socket.on(ToServerEvents.ssuserChangeName, (newNameData) => {
-      if (!newNameData) return console.warn('ssuserChangeName: No user name change data');
-      const { roomName, newName } = newNameData;
+    socket.on(ToServerEvents.ssuserChangeName, (data) => {
+      if (!data) return console.warn('ssuserChangeName: No user name change data');
+      const { roomName, username } = data;
       const room = this._room.getRoom(roomName);
       if (!room) return console.warn('ssuserChangeName: Room not found');
       const user = this._room.getUserBySocketId(roomName, socket.id);
       if (!user) return console.warn('ssuserChangeName: User not found');
       const previousName = user.username;
-      user.username = newName;
-      const systemChat = this.createSystemChat(roomName, `${previousName} has changed their name to ${newName}.`);
+      user.username = username;
+      const systemChat = this.createSystemChat(roomName, `${previousName} has changed their name to ${username}.`);
       this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
-      this._io.to(roomName).emit(ToClientEvents.ssuserNamedChanged, { room, previousName, newName });
+      this._io.to(roomName).emit(ToClientEvents.ssuserNamedChanged, { room, previousName, newName: username });
     });
 
     socket.on(ToServerEvents.ssplaylistAdd, (sound) => {
@@ -95,9 +95,32 @@ export class SyncSound {
       const room = this._room.getRoom(sound.roomName);
       if (!room) return console.warn('ssplaylistAdd: Room not found');
       room.playlist.push(sound);
-      const systemChat = this.createSystemChat(sound.roomName, `${sound.addedBy} has queued the track ${sound.title}!`);
+      const systemChat = this.createSystemChat(
+        sound.roomName,
+        `${sound.addedBy} has queued the track ${sound.title2 ? sound.title2 : sound.title}!`
+      );
       this._io.to(sound.roomName).emit(ToClientEvents.sschatSent, systemChat);
       this._io.to(sound.roomName).emit(ToClientEvents.ssplaylistAdded, room);
+    });
+
+    socket.on(ToServerEvents.ssplayerPlay, (data) => {
+      if (!data) return console.warn('ssplayerPlay: No data');
+      const { roomName, username } = data;
+      const room = this._room.getRoom(roomName);
+      if (!room) return console.warn('ssplayerPlay: Room not found');
+      const systemChat = this.createSystemChat(roomName, username + ' has started playback.');
+      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      socket.to(roomName).emit(ToClientEvents.ssplayerPlayed);
+    });
+
+    socket.on(ToServerEvents.ssplayerPause, (data) => {
+      if (!data) return console.warn('ssplayerPause: No data');
+      const { roomName, username } = data;
+      const room = this._room.getRoom(roomName);
+      if (!room) return console.warn('ssplayerPause: Room not found');
+      const systemChat = this.createSystemChat(roomName, username + ' has paused playback.');
+      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      socket.to(roomName).emit(ToClientEvents.ssplayerPaused);
     });
   };
 

@@ -18,6 +18,11 @@ export interface IUser {
   isHost: boolean;
 }
 
+export interface IRoomUser {
+  roomName: string;
+  username: string;
+}
+
 export interface ISound {
   src: string;
   title: string;
@@ -46,4 +51,5 @@ export interface SCWidget {
   play: () => void;
   pause: () => void;
   bind: (eventName: string, listener: () => void) => void;
+  isPaused: (callback: (isPaused: boolean) => void) => void;
 }

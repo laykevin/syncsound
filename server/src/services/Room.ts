@@ -1,4 +1,4 @@
-import { IRoom, IUser } from 'shared';
+import { IRoom, ISound, IUser } from 'shared';
 
 export class Room {
   roomLookup: Record<string, IRoom>;
@@ -83,5 +83,19 @@ export class Room {
     const user = this.roomLookup[roomName].users[userIndex];
     console.log('Room.getUserIndexBySocketId:', this.roomLookup, userIndex, user);
     return userIndex;
+  };
+
+  getCurrentTrack = (roomName: string): ISound | null => {
+    if (!this.doesRoomExist(roomName)) {
+      console.warn('Room.getCurrentTrack: Room does not exist');
+      return null;
+    }
+    if (!this.roomLookup[roomName].playlist.length) {
+      console.warn('Room.getCurrentTrack: No current track');
+      return null;
+    }
+    const sound = this.roomLookup[roomName].playlist[0];
+    console.log('Room.getCurrentTrack:', this.roomLookup, sound);
+    return sound;
   };
 }

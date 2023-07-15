@@ -69,7 +69,7 @@ export const UsersList: React.FC = () => {
   const { state } = useContext(StateContext);
   const { room, socket } = state;
   const user = SocketController.getCurrentUser(state);
-  console.log('Current user?', user?.username);
+  // console.log('Current user?', user?.username);
 
   const mapUsersList = (roomUser: IUser, index: number) => {
     // if (users.username !== user?.username)
@@ -105,7 +105,7 @@ export const UsersList: React.FC = () => {
     if (!room || !user) return;
     if (typeof nameInputRef.current?.value !== 'string' || !nameInputRef.current.value.trim().length) return;
     const newName = nameInputRef.current.value;
-    socket.emit(ToServerEvents.ssuserChangeName, { roomName: room.roomName, newName });
+    socket.emit(ToServerEvents.ssuserChangeName, { roomName: room.roomName, username: newName });
     setEditingName(false);
   };
 

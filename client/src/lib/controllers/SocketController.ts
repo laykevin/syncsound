@@ -88,6 +88,14 @@ export class SocketController {
       if (!room) return console.warn('ssroomAdded: No room');
       context.mergeState({ room });
     });
+
+    this.socket.on(ToClientEvents.ssplayerPlayed, () => {
+      context.mergeState({ isPlaying: true });
+    });
+
+    this.socket.on(ToClientEvents.ssplayerPaused, () => {
+      context.mergeState({ isPlaying: false });
+    });
   };
 
   public disconnect = (): void => {
