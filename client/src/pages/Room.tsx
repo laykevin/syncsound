@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { Chat, Playlist, Player, PlayerControls } from '../components';
+import { SocketController, StateContext } from '../lib';
 
 interface RoomProps {
   roomName: string;
@@ -20,6 +21,11 @@ const Container = styled(FlexCenter)`
 `;
 
 export const Room: React.FC<RoomProps> = ({ roomName }) => {
+  const { state } = useContext(StateContext);
+  const { room, player, playerStatus, socket } = state;
+  const user = SocketController.getCurrentUser(state);
+  const playerProps = { room, player, playerStatus, socket, user };
+
   return (
     <>
       <Container>
@@ -28,7 +34,7 @@ export const Room: React.FC<RoomProps> = ({ roomName }) => {
       </Container>
       <FlexCenter>
         <Playlist />
-        <Player />
+        <Player {...playerProps} />
         <Chat />
       </FlexCenter>
       <Container>

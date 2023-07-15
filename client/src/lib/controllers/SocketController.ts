@@ -90,11 +90,11 @@ export class SocketController {
     });
 
     this.socket.on(ToClientEvents.ssplayerPlayed, () => {
-      context.mergeState({ isPlaying: true });
+      context.mergeState({ playerStatus: { isPlaying: true, shouldEmit: false } });
     });
 
     this.socket.on(ToClientEvents.ssplayerPaused, () => {
-      context.mergeState({ isPlaying: false });
+      context.mergeState({ playerStatus: { isPlaying: false, shouldEmit: false } });
     });
   };
 

@@ -14,7 +14,7 @@ export const StateContext = createContext<IStateContext>({
     room: null,
     chatLog: [],
     player: null,
-    isPlaying: false,
+    playerStatus: { isPlaying: false, shouldEmit: false },
   },
   setState: () => {},
   mergeState: (nextState: Partial<IState>) => {
@@ -28,7 +28,7 @@ export const StateProvider: React.FC<StateProviderProps> = ({ socket, children }
     room: null,
     chatLog: [],
     player: null,
-    isPlaying: false,
+    playerStatus: { isPlaying: false, shouldEmit: false },
   });
 
   const mergeState = useCallback((nextState: Partial<IState>) => {

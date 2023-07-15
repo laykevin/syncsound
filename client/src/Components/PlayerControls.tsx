@@ -12,11 +12,12 @@ export const PlayerControls: React.FC = () => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [volume, setVolume] = useState<string>('100');
   const { state } = useContext(StateContext);
-  const { room, player, isPlaying } = state;
+  const { room, player, playerStatus } = state;
 
   const handlePlay = () => {
-    if (!player || !room) return console.warn('<PlayerControls>: Missing data', player, room);
-    if (isPlaying) player.pause();
+    if (!player || !room || !playerStatus)
+      return console.warn('<PlayerControls>: Missing data', player, room, playerStatus);
+    if (playerStatus.isPlaying) player.pause();
     else player.play();
   };
 
@@ -26,7 +27,7 @@ export const PlayerControls: React.FC = () => {
   return (
     <FlexCenter>
       <button disabled={!isPlayEnabled} onClick={handlePlay}>
-        {isPlaying ? '⏸️' : '▶️'}
+        {playerStatus.isPlaying ? '⏸️' : '▶️'}
       </button>
       <button disabled={!isNextEnabled}>⏭️</button>
       <button onClick={() => setIsMuted((prev) => !prev)}>{isMuted ? '🔊' : '🔇'}</button>
