@@ -32,6 +32,7 @@
     "@types/react-dom": "^18.2.4",
     "@types/react-transition-group": "^4.4.6",
     "@types/styled-components": "^5.1.26",
+    "@types/youtube": "0.0.47",
     "babel-loader": "^9.1.2",
     "copy-webpack-plugin": "^11.0.0",
     "cors": "^2.8.5",

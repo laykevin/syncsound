@@ -1,8 +1,8 @@
 import { Socket, io } from 'socket.io-client';
 import { ClientToServerEvents, IRoom, IUser, ServerToClientEvents, ToClientEvents, ToServerEvents } from 'shared';
-import { IState, IStateContext } from '.';
+import { IState, IStateContext } from '..';
 
-export class SyncSoundClient {
+export class SocketController {
   public socket: Socket<ServerToClientEvents, ClientToServerEvents>;
 
   constructor() {
@@ -87,6 +87,14 @@ export class SyncSoundClient {
     this.socket.on(ToClientEvents.ssplaylistAdded, (room) => {
       if (!room) return console.warn('ssroomAdded: No room');
       context.mergeState({ room });
+    });
+
+    this.socket.on(ToClientEvents.ssplayerPlayed, () => {
+      context.mergeState({ playerStatus: { isPlaying: true, shouldEmit: false } });
+    });
+
+    this.socket.on(ToClientEvents.ssplayerPaused, () => {
+      context.mergeState({ playerStatus: { isPlaying: false, shouldEmit: false } });
     });
   };
 

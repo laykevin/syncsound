@@ -1,13 +1,6 @@
 import http from 'http';
 import { Server, Socket } from 'socket.io';
-import {
-  ClientToServerEvents,
-  IChatMessage,
-  IUser,
-  ServerToClientEvents,
-  ToClientEvents,
-  ToServerEvents,
-} from 'shared';
+import { ClientToServerEvents, IChatMessage, ServerToClientEvents, ToClientEvents, ToServerEvents } from 'shared';
 import { Room } from '.';
 
 interface SyncSoundConfig {
@@ -83,18 +76,18 @@ export class SyncSound {
       console.log('sschatSend: Chat sent', message);
     });
 
-    socket.on(ToServerEvents.ssuserChangeName, (newNameData) => {
-      if (!newNameData) return console.warn('ssuserChangeName: No user name change data');
-      const { roomName, newName } = newNameData;
+    socket.on(ToServerEvents.ssuserChangeName, (data) => {
+      if (!data) return console.warn('ssuserChangeName: No user name change data');
+      const { roomName, username } = data;
       const room = this._room.getRoom(roomName);
       if (!room) return console.warn('ssuserChangeName: Room not found');
       const user = this._room.getUserBySocketId(roomName, socket.id);
       if (!user) return console.warn('ssuserChangeName: User not found');
       const previousName = user.username;
-      user.username = newName;
-      const systemChat = this.createSystemChat(roomName, `${previousName} has changed their name to ${newName}.`);
+      user.username = username;
+      const systemChat = this.createSystemChat(roomName, `${previousName} has changed their name to ${username}.`);
       this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
-      this._io.to(roomName).emit(ToClientEvents.ssuserNamedChanged, { room, previousName, newName });
+      this._io.to(roomName).emit(ToClientEvents.ssuserNamedChanged, { room, previousName, newName: username });
     });
 
     socket.on(ToServerEvents.ssplaylistAdd, (sound) => {
@@ -102,8 +95,32 @@ export class SyncSound {
       const room = this._room.getRoom(sound.roomName);
       if (!room) return console.warn('ssplaylistAdd: Room not found');
       room.playlist.push(sound);
-      socket.to(sound.roomName).emit(ToClientEvents.ssplaylistAdded, room);
-      console.log('ssplaylistAdd: Sound added', sound);
+      const systemChat = this.createSystemChat(
+        sound.roomName,
+        `${sound.addedBy} has queued the track ${sound.title2 ? sound.title2 : sound.title}!`
+      );
+      this._io.to(sound.roomName).emit(ToClientEvents.sschatSent, systemChat);
+      this._io.to(sound.roomName).emit(ToClientEvents.ssplaylistAdded, room);
+    });
+
+    socket.on(ToServerEvents.ssplayerPlay, (data) => {
+      if (!data) return console.warn('ssplayerPlay: No data');
+      const { roomName, username } = data;
+      const room = this._room.getRoom(roomName);
+      if (!room) return console.warn('ssplayerPlay: Room not found');
+      const systemChat = this.createSystemChat(roomName, username + ' has started playback.');
+      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      socket.to(roomName).emit(ToClientEvents.ssplayerPlayed);
+    });
+
+    socket.on(ToServerEvents.ssplayerPause, (data) => {
+      if (!data) return console.warn('ssplayerPause: No data');
+      const { roomName, username } = data;
+      const room = this._room.getRoom(roomName);
+      if (!room) return console.warn('ssplayerPause: Room not found');
+      const systemChat = this.createSystemChat(roomName, username + ' has paused playback.');
+      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      socket.to(roomName).emit(ToClientEvents.ssplayerPaused);
     });
   };
 
@@ -112,29 +129,26 @@ export class SyncSound {
 
     this._io.sockets.adapter.on('join-room', (roomName, socketId) => {
       if (!this._room.doesRoomExist(roomName)) return console.warn('adapter-join-room: Room not found');
-
       const room = this._room.getRoom(roomName);
       const user = this._room.getUserBySocketId(roomName, socketId);
-      if (room && user) {
-        this._io.to(roomName).emit(ToClientEvents.ssroomUserJoined, room);
-        const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has joined the room!');
-        this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
-      }
+      if (!room || !user) return console.warn('adapter-join-room: User not found');
 
+      const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has joined the room!');
+      this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      this._io.to(roomName).emit(ToClientEvents.ssroomUserJoined, room);
       console.log('adapter-join-room:', roomName, socketId);
     });
 
     this._io.sockets.adapter.on('leave-room', (roomName, socketId) => {
       if (!this._room.doesRoomExist(roomName)) return console.warn('adapter-leave-room: Room not found');
-
       const room = this._room.getRoom(roomName);
       const user = this._room.getUserBySocketId(roomName, socketId);
       if (!room || !user) return console.warn('adapter-leave-room: User not found');
+      this._room.leaveRoom(roomName, socketId);
 
-      this._io.to(roomName).emit(ToClientEvents.ssroomUserLeft, room);
-      this._room.leaveRoom(roomName, user.username);
       const systemChat = this.createSystemChat(roomName, (user.username || 'A user') + ' has left the room.');
       this._io.to(roomName).emit(ToClientEvents.sschatSent, systemChat);
+      this._io.to(roomName).emit(ToClientEvents.ssroomUserLeft, room);
 
       if (room.users.length <= 0) this._room.deleteRoom(roomName);
       console.log('adapter-leave-room:', roomName, socketId);

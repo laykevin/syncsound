@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
 import { styled } from 'styled-components';
-import { StateContext, SyncSoundClient } from '../lib';
+import { StateContext, SocketController } from '../lib';
 import { ISound, SoundOrigin, ToServerEvents } from 'shared';
-import { Player } from './index';
 
 const PlaylistContainer = styled.div`
   padding: 1rem 1rem 0;
@@ -19,9 +18,9 @@ const BlockBold = styled.div`
 `;
 
 export const Playlist: React.FC = () => {
-  const { state, mergeState } = useContext(StateContext);
+  const { state } = useContext(StateContext);
   const { socket, room } = state;
-  const user = SyncSoundClient.getCurrentUser(state);
+  const user = SocketController.getCurrentUser(state);
 
   const handleSend: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
@@ -31,12 +30,9 @@ export const Playlist: React.FC = () => {
     const formJson = Object.fromEntries<string>(formData.entries() as Iterable<readonly [PropertyKey, string]>);
     const sound = extractSoundData(formJson.sound);
     if (!sound) return;
-    const nextRoom = { ...room };
-    nextRoom.playlist = [...room.playlist, sound];
-    mergeState({ room: nextRoom });
     socket.emit(ToServerEvents.ssplaylistAdd, sound);
     form.reset();
-    console.log('<Playlist>: ', event, state, formJson, sound);
+    console.log('<Playlist>:', event, state, formJson, sound);
   };
 
   const extractSoundData = (embedCode: string): ISound | null => {
@@ -71,18 +67,27 @@ export const Playlist: React.FC = () => {
     }
 
     const origin = src.includes(SoundOrigin.SC) ? SoundOrigin.SC : SoundOrigin.YT;
+
+    let title2 = '';
+    const title2AttrStart = embedCode.lastIndexOf('title="');
+    if (origin === SoundOrigin.SC && title2AttrStart > 0) {
+      const titleStart = title2AttrStart + 7;
+      const titleEnd = embedCode.indexOf('"', titleStart); //exclusive
+      title2 = titleEnd > 0 ? embedCode.substring(titleStart, titleEnd) : '';
+    }
+
     const addedBy = user.username;
     const { roomName } = room;
 
     if (origin === SoundOrigin.YT && !src.includes(SoundOrigin.YT)) console.warn('Unknown sound origin');
-    return { src, title, origin, addedBy, roomName };
+    return { src, title, title2, origin, addedBy, roomName };
   };
 
-  const mapPlaylist = (sound: ISound, index: number) => {
+  const mapPlaylist = (sound: ISound, index?: number): JSX.Element => {
     return (
       <div key={index}>
         <div>{sound.title}</div>
-        <small>{sound.src}</small>
+        <small>{sound.title2}</small>
       </div>
     );
   };
@@ -93,7 +98,7 @@ export const Playlist: React.FC = () => {
         <div>
           <div>
             <BlockBold>Now Playing</BlockBold>
-            <div>{room?.playlist && room.playlist.length > 0 ? room.playlist[0].title : 'Add a sound to begin!'}</div>
+            {room?.playlist && room.playlist.length ? mapPlaylist(room.playlist[0]) : <div>Add a sound to begin!</div>}
           </div>
           <div>
             <BlockBold>Up Next</BlockBold>
